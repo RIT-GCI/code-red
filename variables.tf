@@ -50,3 +50,9 @@ variable "openstack_project_domain_id" {
     type = string
     default = "default"
 }
+
+variable "openstack_mainnet_id" {
+    description = "ID of the MAINNET network, used for the floating IP"
+    type = string
+    default = "69729743-b5e4-4f1a-a978-626d2769e2e1"
+}
