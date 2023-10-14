@@ -13,14 +13,13 @@ required_version = ">= 0.14.0"
 provider "openstack" {
   application_credential_secret    = var.openstack_application_credential_secret
   application_credential_name = var.openstack_application_credential_name
-  user_name      = var.openstack_username
   auth_url    = var.openstack_auth_url
   tenant_id     = var.openstack_project_id
   user_domain_name = var.openstack_user_domain_name
   region = var.openstack_region_name
   project_domain_id = var.openstack_project_domain_id
   allow_reauth = false
-  
+
 }
 
 ## NETWORK INIT
@@ -51,7 +50,7 @@ resource "openstack_networking_port_v2" "testubu_port1" {
   }
 }
 
-#creating port 2 and attaching to main-net to allow floating IP. 
+#creating port 2 and attaching to main-net to allow floating IP.
 #Once things are actually deployed and all, the only machines with a 2nd port would be the outward-facing ones.
 resource "openstack_networking_port_v2" "testubu_port2" {
   name               = "testubu_port1"
@@ -83,7 +82,7 @@ resource "openstack_compute_instance_v2" "testubu" {
   network {
     port = openstack_networking_port_v2.testubu_port1.id
   }
-  
+
   network {
     port = openstack_networking_port_v2.testubu_port2.id
   }
