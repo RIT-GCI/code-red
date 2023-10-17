@@ -8,10 +8,6 @@ variable "openstack_application_credential_name" {
     type = string
 }
 
-variable "openstack_username" {
-    description = "OpenStack application credential name"
-    type = string
-}
 
 variable "openstack_auth_url" {
     description = "OpenStack auth url"
