@@ -25,36 +25,81 @@ provider "openstack" {
 
 ## NETWORK INIT
 
-
 #Create ProjectNetwork
-resource "openstack_networking_network_v2" "project_network" {
-  name = "project_network"
+resource "openstack_networking_network_v2" "soc_network" {
+  name = "soc_network"
   admin_state_up = true
 }
 
 #create subnet
-resource "openstack_networking_subnet_v2" "project_subnet" {
-  name = "project_subnet"
-  network_id = openstack_networking_network_v2.project_network.id
-  cidr = "10.13.137.0/24"
+resource "openstack_networking_subnet_v2" "soc_subnet" {
+  name = "soc_subnet"
+  network_id = openstack_networking_network_v2.soc_network.id
+  cidr = "10.10.40.0/24"
+  ip_version = 4
+
+  #Subnet delegation thus far:
+  #.250: Ansible
+  #.200-249: Management Services
+    #.201 Elastic
+}
+
+#Create ProjectNetwork
+resource "openstack_networking_network_v2" "controlsys_network" {
+  name = "controlsys_network"
+  admin_state_up = true
+}
+
+#create subnet
+resource "openstack_networking_subnet_v2" "controlsys_subnet" {
+  name = "controlsys_subnet"
+  network_id = openstack_networking_network_v2.controlsys_network.id
+  cidr = "10.10.30.0/24"
   ip_version = 4
 }
 
-resource "openstack_networking_port_v2" "testubu_port1" {
-  name               = "testubu_port1"
-  network_id         = openstack_networking_network_v2.project_network.id
+resource "openstack_networking_network_v2" "enterprise_network" {
+  name = "enterprise_network"
+  admin_state_up = true
+}
+
+resource "openstack_networking_subnet_v2" "enterprise_subnet" {
+  name = "enterprise_subnet"
+  network_id = openstack_networking_network_v2.enterprise_network.id
+  cidr = "10.10.20.0/24"
+  ip_version = 4
+}
+
+#Create ProjectNetwork
+resource "openstack_networking_network_v2" "business_network" {
+  name = "business_network"
+  admin_state_up = true
+}
+
+#create subnet
+resource "openstack_networking_subnet_v2" "business_subnet" {
+  name = "business_subnet"
+  network_id = openstack_networking_network_v2.business_network.id
+  cidr = "10.10.10.0/24"
+  ip_version = 4
+}
+
+resource "openstack_networking_port_v2" "ansible_port1" {
+  name               = "ansible_port1"
+  network_id         = openstack_networking_network_v2.soc_network.id
   admin_state_up     = "true"
 
   fixed_ip {
-    subnet_id  = openstack_networking_subnet_v2.project_subnet.id
-    ip_address = "10.13.137.10"
+    subnet_id  = openstack_networking_subnet_v2.soc_subnet.id
+    ip_address = "10.10.40.250"
   }
 }
 
+
 #creating port 2 and attaching to main-net to allow floating IP. 
 #Once things are actually deployed and all, the only machines with a 2nd port would be the outward-facing ones.
-resource "openstack_networking_port_v2" "testubu_port2" {
-  name               = "testubu_port1"
+resource "openstack_networking_port_v2" "ansible_port2" {
+  name               = "ansible_port1"
   network_id         = var.openstack_mainnet_id
   admin_state_up     = "true"
 
@@ -68,23 +113,53 @@ resource "openstack_networking_floatingip_v2" "fip1" {
 #associate floating ip to port2
 resource "openstack_networking_floatingip_associate_v2" "fip1_association" {
   floating_ip = openstack_networking_floatingip_v2.fip1.address
-  port_id     = openstack_networking_port_v2.testubu_port2.id
+  port_id     = openstack_networking_port_v2.ansible_port2.id
+}
+
+resource "openstack_networking_port_v2" "elasticsearch_port1" {
+  name               = "elasticsearch_port1"
+  network_id         = openstack_networking_network_v2.soc_network.id
+  admin_state_up     = "true"
+
+  fixed_ip {
+    subnet_id  = openstack_networking_subnet_v2.soc_subnet.id
+    ip_address = "10.10.40.201"
+  }
 }
 
 ### COMPUTE INIT
-resource "openstack_compute_instance_v2" "testubu" {
-  name              = "testubu"
-  image_name        = "UbuntuJammy2204"
+resource "openstack_compute_instance_v2" "ansible" {
+  name              = "ansible"
+  image_name        = "DebianBullseye11"
   flavor_name       = "small"
   key_pair          = "gframe"
   security_groups   = ["default"]
 
+  user_data = templetefile("bootstrap/bootstrapansible.sh.tftpl", {
+    bootstrapsshprivkey = file("bootstrap/id_bootstrap")
+  })
 
   network {
-    port = openstack_networking_port_v2.testubu_port1.id
+    port = openstack_networking_port_v2.ansible_port1.id
   }
   
   network {
-    port = openstack_networking_port_v2.testubu_port2.id
+    port = openstack_networking_port_v2.ansible_port2.id
+  }
+}
+
+resource "openstack_compute_instance_v2" "elasticsearch" {
+  name              = "elasticsearch"
+  image_name        = "DebianBullseye11"
+  flavor_name       = "small"
+  key_pair          = "gframe"
+  security_groups   = ["default"]
+
+  user_data = templatefile("bootstrap/bootstrapelastic.sh.tftpl", {
+    bootstrapsshpubkey = file("bootstrap/id_bootstrap.pub")
+  })
+
+  network {
+    port = openstack_networking_port_v2.elasticsearch_port1.id
   }
 }
