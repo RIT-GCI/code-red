@@ -52,3 +52,8 @@ variable "openstack_mainnet_id" {
     type = string
     default = "69729743-b5e4-4f1a-a978-626d2769e2e1"
 }
+
+variable "openstack_username" {
+    description = "OpenStack application credential name"
+    type = string
+}

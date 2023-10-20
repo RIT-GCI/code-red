@@ -1,0 +1,9 @@
+#!/bin/sh
+
+# This script is built for Debian 11
+
+DEBIAN_FRONTEND=noninteractive
+
+#Allow SSH access for root
+sed -i 's/PermitRootLogin no/PermitRootLogin prohibit-password/g' /etc/ssh/sshd_config
+systemctl restart sshd
