@@ -17,3 +17,9 @@ Terraform configs for Code Red. Once OpenTofu has a stable release we will switc
 ## Security notes:
 
 - Currently, there is a bootstrap private key stored publicly. This is kept here to be simpler to manage and as soon as Ansible is used to bootstrap the servers, it will be removed.
+
+## File layout:
+- Instances should be categorized by their general domain (soc, etc)
+- Instance files should have the port, floating IP associations, and instance definitions
+- router.tf should have network defintions, including Floating IP definitions
+- templatevars.tf contains definitions for variables that are used in templates (as they can be quite large)

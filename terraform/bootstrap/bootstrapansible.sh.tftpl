@@ -43,5 +43,8 @@ EOF
 
 mkdir /root/playbooks
 # loop through all playbooks in a template and copy them to the VM
-%{ for playbook in playbooks }
+%{ for playbook, content in playbooks }
 cat <<EOF > /root/playbooks/${playbook}
+${content}
+EOF
+%{ endfor }
