@@ -47,11 +47,12 @@ variable "openstack_project_domain_id" {
     default = "default"
 }
 
-variable "openstack_mainnet_id" {
-    description = "ID of the MAINNET network, used for the floating IP"
-    type = string
-    default = "69729743-b5e4-4f1a-a978-626d2769e2e1"
-}
+# No longer in use because this causes issues, the router now has a gateway to external249
+# variable "openstack_mainnet_id" {
+#     description = "ID of the MAINNET network, used for the floating IP"
+#     type = string
+#     default = "69729743-b5e4-4f1a-a978-626d2769e2e1"
+# }
 
 variable "openstack_username" {
     description = "OpenStack application credential name"

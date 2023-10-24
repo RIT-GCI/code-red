@@ -1,6 +1,6 @@
 locals {
     playbooks = {
-        "installelastic" = file("playbooks/installelastic.yml")
+        "installelastic.yml" = file("playbooks/installelastic.yml")
     }
 }
 

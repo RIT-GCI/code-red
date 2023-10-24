@@ -6,7 +6,8 @@ DEBIAN_FRONTEND=noninteractive
 
 #Add a user for console login
 #This password is relatively weak (because openstack console doesn't support paste) and shouldn't be kept long-term
-useradd -m -p '$6$sBEMB6F9QRr8JqbP$N30I.atrNu7rTlvy/0daShAJDd3no8ffP5Uvd6Cd1AJz6.6hVNithcFD3jHXTQk1Ui0G7YABXp8GvDzj24YLn.' gido5731
+#useradd -m -p '$6$sBEMB6F9QRr8JqbP$N30I.atrNu7rTlvy/0daShAJDd3no8ffP5Uvd6Cd1AJz6.6hVNithcFD3jHXTQk1Ui0G7YABXp8GvDzj24YLn.' gido5731
+#usermod -aG sudo gido5731
 
 #prereqs
 #set a less miserably slow mirror:

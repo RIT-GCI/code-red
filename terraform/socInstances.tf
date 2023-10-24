@@ -18,9 +18,6 @@ resource "openstack_compute_instance_v2" "ansible" {
     port = openstack_networking_port_v2.ansible_port1.id
   }
   
-  network {
-    port = openstack_networking_port_v2.ansible_port2.id
-  }
 }
 
 resource "openstack_networking_port_v2" "ansible_port1" {
@@ -34,19 +31,10 @@ resource "openstack_networking_port_v2" "ansible_port1" {
   }
 }
 
-#creating port 2 and attaching to main-net to allow floating IP. 
-#Once things are actually deployed and all, the only machines with a 2nd port would be the outward-facing ones.
-resource "openstack_networking_port_v2" "ansible_port2" {
-  name               = "ansible_port1"
-  network_id         = var.openstack_mainnet_id
-  admin_state_up     = "true"
-
-}
-
-#associate floating ip to port2
+#associate floating ip to port1 on ansible
 resource "openstack_networking_floatingip_associate_v2" "fip1_association" {
   floating_ip = openstack_networking_floatingip_v2.fip1.address
-  port_id     = openstack_networking_port_v2.ansible_port2.id
+  port_id     = openstack_networking_port_v2.ansible_port1.id
 }
 
 
