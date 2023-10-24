@@ -1,0 +1,12 @@
+- name: Set SSH keys to be not-bootstrap
+  hosts: localhost
+  become: true
+
+  tasks:
+    # set elastic ssh key to id_elastic in .ssh/config
+    - name: set elastic ssh keys
+      community.general.ssh_config:
+        user: root
+        host: "elastic"
+        identity_file: "/root/.ssh/id_elastic"
+        state: present

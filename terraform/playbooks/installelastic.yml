@@ -3,9 +3,9 @@
   become: true
 
   tasks:
-    - name: Install Java
+    - name: Install gnupg2
       apt:
-        name: openjdk-8-jdk
+        name: gnupg2
         state: present
 
     - name: Add Elasticsearch GPG key
@@ -28,3 +28,9 @@
         name: elasticsearch
         state: started
         enabled: true
+
+    - name: Add Ansible SSH key
+      authorized_key:
+        user: root
+        key: "{{ lookup('file', '~/.ssh/id_elastic.pub') }}"
+        state: present

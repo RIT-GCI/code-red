@@ -23,7 +23,9 @@ apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 93C4A3FD7BB9C367
 apt update
 
 #Install Ansible
-apt install -y ansible
+apt install -y ansible python3-storm python3-pip
+
+python3 -m pip install stormssh
 
 # Setup for SSH
 
@@ -33,14 +35,16 @@ Host *
     StrictHostKeyChecking accept-new
 
 Host elastic
-    HostName 10.10.40.201
+    HostName ${ips.elasticsearch}
     User root
-    IdentityFile /root/.ssh/id_elastic
+    IdentityFile /root/.ssh/id_bootstrap
 EOF
 
 cat <<EOF > /root/.ssh/id_bootstrap
 ${bootstrapsshprivkey}
 EOF
+
+chmod 600 /root/.ssh/id_bootstrap
 
 mkdir /root/playbooks
 # loop through all playbooks in a template and copy them to the VM
@@ -49,3 +53,11 @@ cat <<EOF > /root/playbooks/${playbook}
 ${content}
 EOF
 %{ endfor }
+
+# Create hosts file
+cat <<EOF > /etc/ansible/hosts
+${hostsfile}
+EOF
+
+#run all playbooks
+ansible-playbook -i /root/playbooks/hosts /root/playbooks/main.yml

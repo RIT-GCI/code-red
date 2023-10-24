@@ -5,13 +5,14 @@ resource "openstack_compute_instance_v2" "ansible" {
   key_pair          = "gframe"
   security_groups   = ["default"]
 
-  #not sure why this is needed but I got an error about it being invalid when it was undefined.
-  power_state = "active"
 
   user_data = templatefile("bootstrap/bootstrapansible.sh.tftpl", {
     bootstrapsshprivkey = file("bootstrap/id_bootstrap")
     playbooks = local.playbooks
-
+    "hostsfile" = file("bootstrap/ansiblehosts")
+    ips = {
+      "elasticsearch" = openstack_networking_port_v2.elasticsearch_port1.fixed_ip[0].ip_address
+    }
   })
 
   network {
@@ -48,6 +49,7 @@ resource "openstack_compute_instance_v2" "elasticsearch" {
   security_groups   = ["default"]
 
   user_data = templatefile("bootstrap/bootstrapelastic.sh.tftpl", {
+    "bootstrapsshpubkey": file("bootstrap/id_bootstrap.pub")
   })
 
   network {
