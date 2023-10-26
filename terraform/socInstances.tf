@@ -2,7 +2,7 @@ resource "openstack_compute_instance_v2" "ansible" {
   name              = "ansible"
   image_name        = "DebianBullseye11"
   flavor_name       = "small"
-  key_pair          = "gframe"
+  key_pair          = "bootstrap"
   security_groups   = ["default"]
 
 
@@ -18,7 +18,7 @@ resource "openstack_compute_instance_v2" "ansible" {
   network {
     port = openstack_networking_port_v2.ansible_port1.id
   }
-  
+
 }
 
 resource "openstack_networking_port_v2" "ansible_port1" {
@@ -45,7 +45,7 @@ resource "openstack_compute_instance_v2" "elasticsearch" {
   name              = "elasticsearch"
   image_name        = "DebianBullseye11"
   flavor_name       = "small"
-  key_pair          = "gframe"
+  key_pair          = "bootstrap"
   security_groups   = ["default"]
 
   user_data = templatefile("bootstrap/bootstrapelastic.sh.tftpl", {
