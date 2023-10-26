@@ -17,12 +17,6 @@ variable "openstack_auth_url" {
     default = "https://openstack.cyberrange.rit.edu:5000/v3"
 }
 
-# variable "openstack_project_name" {
-#     description = "OpenStack project ID"
-#     type = string
-#     default = "code-red"
-# }
-
 variable "openstack_project_id" {
     description = "OpenStack project ID"
     type = string
@@ -47,14 +41,31 @@ variable "openstack_project_domain_id" {
     default = "default"
 }
 
-# No longer in use because this causes issues, the router now has a gateway to external249
-# variable "openstack_mainnet_id" {
-#     description = "ID of the MAINNET network, used for the floating IP"
-#     type = string
-#     default = "69729743-b5e4-4f1a-a978-626d2769e2e1"
-# }
-
 variable "openstack_username" {
     description = "OpenStack application credential name"
     type = string
+}
+
+variable "windows_admin_username"{
+    description = "Username for the local admin"
+    type = string
+    default = "Administrator"
+}
+
+variable "windows_admin_password" {
+    description = "Password for the local admin"
+    type        = string
+    default     = "password"
+}
+
+variable "ansible_user"{
+    description = "User for ansible"
+    type        = string
+    default     = "ansible"
+}
+
+variable "ansible_password"{
+    description = "Password for the ansible user"
+    type        = string
+    default     = "ansible"
 }

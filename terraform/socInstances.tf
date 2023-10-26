@@ -13,6 +13,9 @@ resource "openstack_compute_instance_v2" "ansible" {
     ips = {
       "elasticsearch" = openstack_networking_port_v2.elasticsearch_port1.fixed_ip[0].ip_address
     }
+    secretsFilePath = file("secrets.yml")
+    vaultPassFilePath = file("vault-pass.txt")
+    hostsYAML = file("inventory/hosts.yaml")
   })
 
   network {
@@ -37,8 +40,6 @@ resource "openstack_networking_floatingip_associate_v2" "fip1_association" {
   floating_ip = openstack_networking_floatingip_v2.fip1.address
   port_id     = openstack_networking_port_v2.ansible_port1.id
 }
-
-
 
 
 resource "openstack_compute_instance_v2" "elasticsearch" {

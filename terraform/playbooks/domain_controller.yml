@@ -1,0 +1,16 @@
+- name: win_ping module demo
+  hosts: domain_controller
+  become: false
+  gather_facts: false
+  tasks:
+    - name: test connection
+      ansible.windows.win_ping:
+
+- name: create a test file
+  hosts: domain_controller
+  become: true
+  tasks:
+    - name: create a file
+      ansible.windows.win_file:
+        path: C:\helloWorld
+        state: touch

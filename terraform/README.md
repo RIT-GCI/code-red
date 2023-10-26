@@ -22,6 +22,20 @@ Terraform configs for Code Red. Once OpenTofu has a stable release we will switc
 
 - Currently, there is a bootstrap private key stored publicly. This is kept here to be simpler to manage and as soon as Ansible is used to bootstrap the servers, it will be removed.
 
+## Ansible Vault
+
+Ansible Vault can be used to encrypt and decrypt secrets.
+
+Currently, ansible vault is being used to store variables for the domain controller. If storing any passwords/keys we can use the vault to encrypt it when pushing to Github.
+
+- Files can be encrypted using `ansible-vault encrypt ${filename}`.
+- Files can be decrypted using `ansible-vault decrypt ${filename}`.
+- Files can be edited using `ansible-vault edit ${filename}`.
+- All of the above will ask for password with a prompt.
+- `--vault-password-file=${password_file_location}` can be used in conjunction with the above commands to provide plain-text password through a file.
+- `ansible-playbook -i /playbooks/{playbook}.yml --vault-password-file={vault-pass-file}.txt` can be used to provide the playbook with the vault password.
+- `ansible-vault encrypt_string "{some_string}" --name {some_name}` can be used to create secret variables.
+
 ## File layout
 
 - Instances should be categorized by their general domain (soc, etc)

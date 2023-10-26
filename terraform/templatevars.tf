@@ -3,6 +3,7 @@ locals {
         "installelastic.yml" = file("playbooks/installelastic.yml")
         "setsshkeys.yml" = file("playbooks/setsshkeys.yml")
         "main.yml" = file("playbooks/main.yml")
+        "domain_controller.yml" = file("playbooks/domain_controller.yml")
     }
     ansiblehostfile = file("bootstrap/ansiblehosts")
 }
