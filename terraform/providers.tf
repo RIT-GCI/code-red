@@ -8,4 +8,5 @@ provider "openstack" {
   region = var.openstack_region_name
   project_domain_id = var.openstack_project_domain_id
   allow_reauth = false
+  user_name = var.openstack_username
 }

@@ -1,0 +1,9 @@
+- name: "Generate SSH keys"
+  hosts: localhost
+  become: true
+
+  tasks:
+    - name: Elastic ssh key
+      community.crypto.openssh_keypair:
+        path: /root/.ssh/id_elastic
+        type: ed25519

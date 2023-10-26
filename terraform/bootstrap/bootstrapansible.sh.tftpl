@@ -1,0 +1,63 @@
+#!/bin/sh
+
+# This script is built for Debian 11
+
+DEBIAN_FRONTEND=noninteractive
+
+#Add a user for console login
+#This password is relatively weak (because openstack console doesn't support paste) and shouldn't be kept long-term
+#useradd -m -p '$6$sBEMB6F9QRr8JqbP$N30I.atrNu7rTlvy/0daShAJDd3no8ffP5Uvd6Cd1AJz6.6hVNithcFD3jHXTQk1Ui0G7YABXp8GvDzj24YLn.' gido5731
+#usermod -aG sudo gido5731
+
+#prereqs
+#set a less miserably slow mirror:
+sed -i 's|http://deb.debian.org|http://mirror.rit.edu|g' /etc/apt/sources.list
+apt update
+# kitty-terminfo for gido's terminal, will be moved to an ansible config later.
+apt install -y gnupg2 kitty-terminfo
+
+# Configure Ansible PPA
+# We use the PPA so all our updates are managed through apt rather than pip
+echo "deb http://ppa.launchpad.net/ansible/ansible/ubuntu focal main" > /etc/apt/sources.list.d/ansible.list
+apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 93C4A3FD7BB9C367
+apt update
+
+#Install Ansible
+apt install -y ansible python3-storm python3-pip
+
+python3 -m pip install stormssh
+
+# Setup for SSH
+
+mkdir /root/.ssh
+cat <<EOF > /root/.ssh/config
+Host *
+    StrictHostKeyChecking accept-new
+
+Host elastic
+    HostName ${ips.elasticsearch}
+    User root
+    IdentityFile /root/.ssh/id_bootstrap
+EOF
+
+cat <<EOF > /root/.ssh/id_bootstrap
+${bootstrapsshprivkey}
+EOF
+
+chmod 600 /root/.ssh/id_bootstrap
+
+mkdir /root/playbooks
+# loop through all playbooks in a template and copy them to the VM
+%{ for playbook, content in playbooks }
+cat <<EOF > /root/playbooks/${playbook}
+${content}
+EOF
+%{ endfor }
+
+# Create hosts file
+cat <<EOF > /etc/ansible/hosts
+${hostsfile}
+EOF
+
+#run all playbooks
+ansible-playbook -i /root/playbooks/hosts /root/playbooks/main.yml

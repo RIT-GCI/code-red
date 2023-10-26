@@ -1,7 +1,7 @@
 resource "openstack_networking_router_v2" "router" {
   name           = "router"
   admin_state_up = "true"
-
+  external_network_id = "d96988a6-c388-4032-8067-0b89d572cad0"
 }
 
 resource "openstack_networking_network_v2" "business_network"{
@@ -80,6 +80,11 @@ resource "openstack_networking_subnet_v2" "soc_lan" {
 resource "openstack_networking_router_interface_v2" "router_soc_lan_interface"{
   router_id = openstack_networking_router_v2.router.id
   subnet_id = openstack_networking_subnet_v2.soc_lan.id
+}
+
+#create floating IP
+resource "openstack_networking_floatingip_v2" "fip1" {
+  pool = "external249"
 }
 
 

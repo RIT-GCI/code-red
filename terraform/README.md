@@ -13,3 +13,13 @@ Terraform configs for Code Red. Once OpenTofu has a stable release we will switc
 1. Run `terraform plan -var-file vars.tfvars` to ensure that the changes terraform will make are what you expect
 1. Run `terraform apply -var-file vars.tfvars` to apply the changes
 1. Run `terraform destroy -var-file vars.tfvars` to destroy the changes once you are done with them (note that you can run apply multiple times without destroying and only the difference between what's in openstack and the state file will be applied)
+
+## Security notes:
+
+- Currently, there is a bootstrap private key stored publicly. This is kept here to be simpler to manage and as soon as Ansible is used to bootstrap the servers, it will be removed.
+
+## File layout:
+- Instances should be categorized by their general domain (soc, etc)
+- Instance files should have the port, floating IP associations, and instance definitions
+- router.tf should have network defintions, including Floating IP definitions
+- templatevars.tf contains definitions for variables that are used in templates (as they can be quite large)
