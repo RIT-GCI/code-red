@@ -8,12 +8,20 @@ resource "openstack_compute_instance_v2" "ansible" {
 
   user_data = templatefile("bootstrap/bootstrapansible.sh.tftpl", {
     bootstrapsshprivkey = file("bootstrap/id_bootstrap")
-    playbooks = local.playbooks
+    playbooks = [for f in fileset(path.module, "playbooks/*.yml"): {
+                        filename = f
+                        content = file(f)
+                   }]
     "hostsfile" = file("bootstrap/ansiblehosts")
     ips = {
       "elasticsearch" = openstack_networking_port_v2.elasticsearch_port1.fixed_ip[0].ip_address
     }
+    usersshkeys = [for f in fileset(path.module, "ssh_keys/id_*.pub"): {
+                        filename = f
+                        content = file(f)
+                   }]
   })
+
 
   network {
     port = openstack_networking_port_v2.ansible_port1.id
