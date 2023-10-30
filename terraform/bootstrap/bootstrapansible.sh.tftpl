@@ -34,10 +34,15 @@ cat <<EOF > /root/.ssh/config
 Host *
     StrictHostKeyChecking accept-new
 
-Host elastic
-    HostName ${ips.elasticsearch}
+Host elastic*
     User root
     IdentityFile /root/.ssh/id_bootstrap
+
+Host elastic
+    HostName ${ips.elasticsearch}
+
+Host elasticdata1
+    HostName ${ips.elasticsearchdata1}
 EOF
 
 cat <<EOF > /root/.ssh/id_bootstrap
