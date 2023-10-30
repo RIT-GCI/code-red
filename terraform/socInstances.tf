@@ -2,7 +2,7 @@ resource "openstack_compute_instance_v2" "ansible" {
   name              = "ansible"
   image_name        = "DebianBullseye11"
   flavor_name       = "small"
-  key_pair          = "bootstrap"
+  key_pair          = "gframe"
   security_groups   = ["default"]
 
 
@@ -53,7 +53,7 @@ resource "openstack_compute_instance_v2" "elasticsearch" {
   name              = "elasticsearch"
   image_name        = "DebianBullseye11"
   flavor_name       = "small"
-  key_pair          = "bootstrap"
+  key_pair          = "gframe"
   security_groups   = ["default"]
 
   user_data = templatefile("bootstrap/bootstrapelastic.sh.tftpl", {
@@ -80,7 +80,7 @@ resource "openstack_compute_instance_v2" "elasticsearchdata1" {
   name              = "elasticsearchdata1"
   image_name        = "DebianBullseye11"
   flavor_name       = "small"
-  key_pair          = "bootstrap"
+  key_pair          = "gframe"
   security_groups   = ["default"]
 
   user_data = templatefile("bootstrap/bootstrapelastic.sh.tftpl", {
