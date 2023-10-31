@@ -34,10 +34,15 @@ cat <<EOF > /root/.ssh/config
 Host *
     StrictHostKeyChecking accept-new
 
-Host elastic
-    HostName ${ips.elasticsearch}
+Host elastic*
     User root
     IdentityFile /root/.ssh/id_bootstrap
+
+Host elastic
+    HostName ${ips.elasticsearch}
+
+Host elasticdata1
+    HostName ${ips.elasticsearchdata1}
 EOF
 
 cat <<EOF > /root/.ssh/id_bootstrap
@@ -48,9 +53,16 @@ chmod 600 /root/.ssh/id_bootstrap
 
 mkdir /root/playbooks
 # loop through all playbooks in a template and copy them to the VM
-%{ for playbook, content in playbooks }
-cat <<EOF > /root/playbooks/${playbook}
-${content}
+%{ for playbook in playbooks }
+cat <<EOF > /root/${playbook.filename}
+${playbook.content}
+EOF
+%{ endfor }
+
+mkdir /root/ssh_keys
+%{ for key in usersshkeys }
+cat <<EOF > /root/${key.filename}
+${key.content}
 EOF
 %{ endfor }
 

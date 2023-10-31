@@ -7,7 +7,9 @@
 
 - name: "Run elastic playbook"
   ansible.builtin.import_playbook: installelastic.yml
-    
+
+- name: "Create users"
+  ansible.builtin.import_playbook: generateusers.yml
 
 
 #FINAL PLAYBOOK: Set SSH keys to be not-bootstrap
