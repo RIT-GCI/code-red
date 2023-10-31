@@ -29,7 +29,7 @@ python3 -m pip install stormssh
 
 # Setup for SSH
 
-mkdir /root/.ssh
+mkdir -p /root/.ssh
 cat <<EOF > /root/.ssh/config
 Host *
     StrictHostKeyChecking accept-new
@@ -72,7 +72,7 @@ ${hostsfile}
 EOF
 
 #run all playbooks
-ansible-playbook -i /root/playbooks/hosts /root/playbooks/main.yml
+ansible-playbook -i /etc/ansible/hosts /root/playbooks/main.yml
 
 
 ##########################Initializing Domain Controller######################################################
