@@ -6,21 +6,21 @@ resource "openstack_compute_instance_v2" "ansible" {
   security_groups   = ["default"]
 
 
-  user_data = templatefile("bootstrap/bootstrapansible.sh.tftpl", {
-    bootstrapsshprivkey = file("bootstrap/id_bootstrap")
-    playbooks = [for f in fileset(path.module, "playbooks/*.yml"): {
+  user_data = templatefile("ansible/bootstrap/bootstrapansible.sh.tftpl", {
+    bootstrapsshprivkey = file("ansible/bootstrap/id_bootstrap")
+    playbooks = [for f in fileset(path.module, "ansible/playbooks/*.yml"): {
                         filename = f
                         content = file(f)
                    }]
-    "hostsfile" = file("bootstrap/ansiblehosts")
-    secretsFilePath = file("secrets.yml")
-    vaultPassFilePath = file("vault-pass.txt")
-    hostsYAML = file("inventory/hosts.yaml")
+    "hostsfile" = file("ansible/inventory/ansiblehosts")
+    secretsFilePath = file("ansible/secrets.yml")
+    vaultPassFilePath = file("ansible/vault-pass.txt")
+    hostsYAML = file("ansible/inventory/hosts.yaml")
     ips = {
       "elasticsearch" = openstack_networking_port_v2.elasticsearch_port1.fixed_ip[0].ip_address,
       "elasticsearchdata1" = openstack_networking_port_v2.elasticsearchdata1_port1.fixed_ip[0].ip_address
     }
-    usersshkeys = [for f in fileset(path.module, "ssh_keys/id_*.pub"): {
+    usersshkeys = [for f in fileset(path.module, "/ansible/ssh_keys/id_*.pub"): {
                         filename = f
                         content = file(f)
                    }]
@@ -59,8 +59,8 @@ resource "openstack_compute_instance_v2" "elasticsearch" {
   key_pair          = "gframe"
   security_groups   = ["default"]
 
-  user_data = templatefile("bootstrap/bootstrapelastic.sh.tftpl", {
-    "bootstrapsshpubkey": file("bootstrap/id_bootstrap.pub")
+  user_data = templatefile("ansible/bootstrap/bootstrapelastic.sh.tftpl", {
+    "bootstrapsshpubkey": file("ansible/bootstrap/id_bootstrap.pub")
   })
 
   network {
@@ -86,8 +86,8 @@ resource "openstack_compute_instance_v2" "elasticsearchdata1" {
   key_pair          = "gframe"
   security_groups   = ["default"]
 
-  user_data = templatefile("bootstrap/bootstrapelastic.sh.tftpl", {
-    "bootstrapsshpubkey": file("bootstrap/id_bootstrap.pub")
+  user_data = templatefile("ansible/bootstrap/bootstrapelastic.sh.tftpl", {
+    "bootstrapsshpubkey": file("ansible/bootstrap/id_bootstrap.pub")
   })
 
   network {

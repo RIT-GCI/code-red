@@ -41,4 +41,9 @@ resource "openstack_compute_instance_v2" "DomainController" {
 
 		</powershell>
 		EOF
+
+#  provisioner "local-exec" {
+#     working_dir = "./"
+#     command = "sleep 120; sed -i '' 's/PUBLICIP/${aws_instance.windows_2016_dc.public_ip}/g' hosts;ansible-playbook -i hosts playbooks/dc01-instance.yml"
+#   }
 }
