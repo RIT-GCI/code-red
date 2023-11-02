@@ -1,0 +1,39 @@
+# Playbook to generate users for Ashim and I
+- name: addusers
+  hosts: all, localhost
+  tasks:
+    - name: Create ashim user
+      user:
+        name: ashim
+        shell: /bin/bash
+
+        # placeholder password, MUST ESCAPE $ with \$
+
+        password: '\$6\$u.uXLWQLGTkfGX59\$NGrrqFvYJcv719rYJdK.w5/xiYxX8qYgG9XnuruM2yBtom7LR.ea5U5fQq9X9f/QKWsKWvqmZx4iS3mwpjuQy1'
+        state: present
+        createhome: true
+        groups: sudo
+        append: true
+
+    - name: Deploy ashim ssh key
+      authorized_key:
+        user: ashim
+        key: "{{ lookup('file', '/root/ssh_keys/id_ashim.pub') }}"
+        state: present
+
+# Create gido user
+    - name: Create gido5731 user
+      user:
+        name: gido5731
+        shell: /bin/bash
+        password: '\$6\$jJMv9ZFl5WQjYijn\$XgsiWLq9KL0brsGjbbiceFZnVTGdqG7MB5HaFSiZCiUjOeVJcLrA/SClwUDy/1GmmOjPtX.X0yzKYesIThvJf.'
+        state: present
+        createhome: true
+        groups: sudo
+        append: true
+
+    - name: Deploy gido5731 ssh key
+      authorized_key:
+        user: gido5731
+        key: "{{ lookup('file', '/root/ssh_keys/id_gido5731.pub') }}"
+        state: present
