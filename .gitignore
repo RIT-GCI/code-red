@@ -3,3 +3,4 @@ vars.tfvars
 terraform.tfstate.backup
 terraform.tfstate
 .terraform.tfstate.lock.info
+vault-pass.txt
