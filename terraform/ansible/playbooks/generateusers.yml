@@ -7,7 +7,6 @@
       ansible.builtin.user:
         name: ashim
         shell: /bin/bash
-        # placeholder password, MUST ESCAPE $ with \$
         password: '\$6\$u.uXLWQLGTkfGX59\$NGrrqFvYJcv719rYJdK.w5/xiYxX8qYgG9XnuruM2yBtom7LR.ea5U5fQq9X9f/QKWsKWvqmZx4iS3mwpjuQy1'
         state: present
         createhome: true
