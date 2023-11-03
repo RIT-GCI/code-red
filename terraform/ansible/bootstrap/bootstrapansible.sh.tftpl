@@ -29,7 +29,6 @@ python3 -m pip install stormssh
 
 # Setup for SSH
 
-mkdir /root/.ssh
 cat <<EOF > /root/.ssh/config
 Host *
     StrictHostKeyChecking accept-new
@@ -61,11 +60,16 @@ ${playbook.content}
 EOF
 %{ endfor }
 
-mkdir /root/ssh_keys
+mkdir -p /root/ansible/ssh_keys
 %{ for key in usersshkeys }
 cat <<EOF > /root/${key.filename}
 ${key.content}
 EOF
+
+cat <<EOF >> /root/.ssh/authorized_keys
+${key.content}
+EOF
+
 %{ endfor }
 
 # Create hosts file
