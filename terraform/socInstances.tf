@@ -12,7 +12,7 @@ resource "openstack_compute_instance_v2" "ansible" {
                         filename = f
                         content = file(f)
                    }]
-    "hostsfile" = file("ansible/bootstrap/ansiblehosts")
+    "hostsfile" = file("ansible/inventory/ansiblehosts")
     ips = {
       "elasticsearch" = openstack_networking_port_v2.elasticsearch_port1.fixed_ip[0].ip_address,
       "elasticsearchdata1" = openstack_networking_port_v2.elasticsearchdata1_port1.fixed_ip[0].ip_address
