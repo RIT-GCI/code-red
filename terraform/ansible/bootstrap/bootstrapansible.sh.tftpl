@@ -29,7 +29,6 @@ python3 -m pip install stormssh
 
 # Setup for SSH
 
-mkdir -p /root/.ssh
 cat <<EOF > /root/.ssh/config
 Host *
     StrictHostKeyChecking accept-new
@@ -51,7 +50,9 @@ EOF
 
 chmod 600 /root/.ssh/id_bootstrap
 
-mkdir /root/playbooks
+# apparently filename consists of the actual filepath relative to terraform root
+mkdir -p /root/ansible/playbooks
+
 # loop through all playbooks in a template and copy them to the VM
 %{ for playbook in playbooks }
 cat <<EOF > /root/${playbook.filename}
@@ -59,11 +60,16 @@ ${playbook.content}
 EOF
 %{ endfor }
 
-mkdir /root/ssh_keys
+mkdir -p /root/ansible/ssh_keys
 %{ for key in usersshkeys }
 cat <<EOF > /root/${key.filename}
 ${key.content}
 EOF
+
+cat <<EOF >> /root/.ssh/authorized_keys
+${key.content}
+EOF
+
 %{ endfor }
 
 # Create hosts file
@@ -72,7 +78,7 @@ ${hostsfile}
 EOF
 
 #run all playbooks
-ansible-playbook -i /etc/ansible/hosts /root/playbooks/main.yml
+ansible-playbook -i /etc/ansible/hosts /root/ansible/playbooks/main.yml
 
 
 ##########################Initializing Domain Controller######################################################
