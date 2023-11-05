@@ -14,28 +14,14 @@
       apt:
         name: gnupg2
         state: present
-#generate openssl snakeoil certs
-    - name: Generate snakeoil privkey
-      openssl_privatekey:
-        path: /etc/ssl/private/ssl-cert-snakeoil.key
-        owner: root
-        group: root
-        mode: '0600'
-        backup: yes
-        curve: secp521r1
-        type: ECC
-        state: present
-    - name: Generate snakeoil cert
-      openssl_certificate:
-        provider: selfsigned
-        path: /etc/ssl/certs/ssl-cert-snakeoil.pem
-        privatekey_path: /etc/ssl/private/ssl-cert-snakeoil.key
-        extended_key_usage: ["1.2.840.10045.2.1"]
-        owner: root
-        group: root
-        mode: '0600'
-        backup: yes
 
+
+- name: Generate Snakeoil Certs
+  hosts: localhost
+  tasks:
+    - name: gencerts
+      shell: |
+        openssl req -x509 -nodes -days 3650 -newkey EC -pkeyopt ec_paramgen_curve:secp521r1 -keyout /etc/ssl/private/ssl-cert-snakeoil.key -out /etc/ssl/certs/ssl-cert-snakeoil.pem -subj "/C=US/ST=Nuuuuuuu yawk/L=rock /O=fizzy wizzy electrocity/OU=code/CN=red/emailAddress=gidooo@mail.rit.edu"
 
 - name: Configure Elasticsearch Master
   hosts: elasticmaster
