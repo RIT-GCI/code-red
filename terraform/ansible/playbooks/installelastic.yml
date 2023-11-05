@@ -1,20 +1,67 @@
+- name: Install/configure Dependencies for Elastic
+  hosts: elastic
+  tasks:
+    #todo: move this one to main or something, this is just for testing
+    - name: Update apt package repo
+      become: true
+      apt:
+        #not running upgrade so there aren't any surprises with new packages or dependencies.
+        # this is obviously not the most secure, but that's sort of the point
+        #upgrade: yes
+        update_cache: yes
+        cache_valid_time: 86400 #One day
+    - name: Install gnupg2
+      apt:
+        name: gnupg2
+        state: present
+#generate openssl snakeoil certs
+    - name: Generate snakeoil privkey
+      openssl_privatekey:
+        path: /etc/ssl/private/ssl-cert-snakeoil.key
+        owner: root
+        group: root
+        mode: '0600'
+        backup: yes
+        curve: secp521r1
+        type: ECC
+        state: present
+    - name: Generate snakeoil cert
+      openssl_certificate:
+        provider: selfsigned
+        path: /etc/ssl/certs/ssl-cert-snakeoil.pem
+        privatekey_path: /etc/ssl/private/ssl-cert-snakeoil.key
+        extended_key_usage: ["1.2.840.10045.2.1"]
+        owner: root
+        group: root
+        mode: '0600'
+        backup: yes
+
+
 - name: Configure Elasticsearch Master
   hosts: elasticmaster
   roles:
-    - { role: elasticmaster, es_instance_name: "elasticsearch", es_heap_size: "768M", es_config: {network.host: "_eth0_", http.port: 9200, transport.tcp.port: 9300, node.data: false, node.master: true, bootstrap.mlockall: true } }
-  become: true
-
-  tasks:
-  - name: Install Elastic
-    ansible.builtin.import_playbook: installelastictasks.yml
+    - { role: elasticsearch, es_instance_name: "{{ inventory_hostname }}", es_heap_size: "512M", es_config: {network.host: "0.0.0.0", http.port: 9200, transport.port: 9300, node.data: false, node.master: true, cluster.initial_master_nodes: "{{ inventory_hostname }}", xpack.security.transport.ssl.enabled: true, xpack.security.transport.ssl.verification_mode: none, xpack.security.transport.ssl.client_authentication: optional} }
+  vars:
+    es_enable_http_ssl: true
+    es_api_basic_auth_username: elastic
+    #todo: set this in an intelligent way
+    es_api_basic_auth_password: changeme
+    es_ssl_key: /etc/ssl/private/ssl-cert-snakeoil.key
+    es_ssl_certificate: /etc/ssl/certs/ssl-cert-snakeoil.pem
 
 
 - name: Configure Elasticsearch Data Nodes
   hosts: elasticdata
   roles:
-    - { role: elasticdata, es_instance_name: "elasticdata1", es_heap_size: "768M", es_config: {network.host: "_eth0_", discovery.zen.ping.unicast.hosts: "10.10.40.201:9300", http.port: 9200, transport.tcp.port: 9300, node.data: true, node.master: false, bootstrap.mlockall: true } }
-  become: true
+    - { role: elasticsearch, es_instance_name: "{{ inventory_hostname }}", es_heap_size: "512M", es_config: {network.host: "0.0.0.0", discovery.zen.ping.unicast.hosts: "10.10.40.201:9300", http.port: 9200, transport.port: 9300, node.data: true, node.master: false,  xpack.security.transport.ssl.enabled: true, xpack.security.transport.ssl.verification_mode: none, xpack.security.transport.ssl.client_authentication: optional } }
+  vars:
+    es_enable_http_ssl: true
+    es_api_basic_auth_username: elastic
+    #todo: set this in an intelligent way
+    es_api_basic_auth_password: changeme
+    es_ssl_key: /etc/ssl/private/ssl-cert-snakeoil.key
+    es_ssl_certificate: /etc/ssl/certs/ssl-cert-snakeoil.pem
 
-  tasks:
-  - name: Install Elastic
-    ansible.builtin.import_playbook: installelastictasks.yml
+
+- name: Finish Elastic install
+  ansible.builtin.import_playbook: installelastictasks.yml

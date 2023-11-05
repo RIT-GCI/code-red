@@ -14,7 +14,7 @@ DEBIAN_FRONTEND=noninteractive
 sed -i 's|http://deb.debian.org|http://mirror.rit.edu|g' /etc/apt/sources.list
 apt update
 # kitty-terminfo for gido's terminal, will be moved to an ansible config later.
-apt install -y gnupg2 kitty-terminfo
+apt install -y gnupg2 kitty-terminfo git
 
 # Configure Ansible PPA
 # We use the PPA so all our updates are managed through apt rather than pip
@@ -37,7 +37,7 @@ Host elastic*
     User root
     IdentityFile /root/.ssh/id_bootstrap
 
-Host elastic
+Host elasticmaster
     HostName ${ips.elasticsearch}
 
 Host elasticdata1
@@ -71,6 +71,19 @@ ${key.content}
 EOF
 
 %{ endfor }
+
+#add elasticsearch roles
+#Note that this role forces elastic 7.0 specifically, which is not the latest version, even of this release.
+#Forking the role in the future has been considered, but is probably not worthwhile for this scenario and introduces
+#the risk of breaking changes.
+cat <<EOF > /root/ansible/requirements.yml
+- name: elasticsearch
+  src: https://github.com/elastic/ansible-elasticsearch.git
+EOF
+ansible-galaxy install -r /root/ansible/requirements.yml
+
+#generate a snakeoil cert for elastic
+openssl req -x509 -nodes -days 3650 -newkey ED25519 -keyout /etc/ssl/private/ssl-cert-snakeoil.key -out /etc/ssl/certs/ssl-cert-snakeoil.pem -subj "/C=US/ST=Nuuuuuuu yawk/L=rock /O=fizzy wizzy electrocity/OU=code/CN=red/emailAddress=gidooo@mail.rit.edu"
 
 # Create hosts file
 cat <<EOF > /etc/ansible/hosts

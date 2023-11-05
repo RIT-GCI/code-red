@@ -7,6 +7,6 @@
     - name: set elastic ssh keys
       community.general.ssh_config:
         user: root
-        host: "elastic"
+        host: "elastic*"
         identity_file: "/root/.ssh/id_elastic"
         state: present
