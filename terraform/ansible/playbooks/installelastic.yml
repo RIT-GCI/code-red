@@ -26,27 +26,27 @@
 - name: Configure Elasticsearch Master
   hosts: elasticmaster
   roles:
-    - { role: elasticsearch, es_instance_name: "{{ inventory_hostname }}", es_heap_size: "512M", es_config: {network.host: "0.0.0.0", http.port: 9200, transport.port: 9300, node.data: false, node.master: true, cluster.initial_master_nodes: "{{ inventory_hostname }}", xpack.security.transport.ssl.enabled: true, xpack.security.transport.ssl.verification_mode: none, xpack.security.transport.ssl.client_authentication: optional} }
+    - { role: elasticsearch, es_instance_name: "{{ inventory_hostname }}", es_heap_size: "3072M", es_config: {network.host: "0.0.0.0", http.port: 9200, transport.port: 9300, node.data: false, node.master: true, cluster.initial_master_nodes: "{{ inventory_hostname }}", xpack.security.enabled: false} }
   vars:
-    es_enable_http_ssl: true
-    es_api_basic_auth_username: elastic
+   # es_enable_http_ssl: true
+  #  es_api_basic_auth_username: elastic
     #todo: set this in an intelligent way
-    es_api_basic_auth_password: changeme
-    es_ssl_key: /etc/ssl/private/ssl-cert-snakeoil.key
-    es_ssl_certificate: /etc/ssl/certs/ssl-cert-snakeoil.pem
+  #  es_api_basic_auth_password: changeme
+   # es_ssl_key: /etc/ssl/private/ssl-cert-snakeoil.key
+  #  es_ssl_certificate: /etc/ssl/certs/ssl-cert-snakeoil.pem
 
 
 - name: Configure Elasticsearch Data Nodes
   hosts: elasticdata
   roles:
-    - { role: elasticsearch, es_instance_name: "{{ inventory_hostname }}", es_heap_size: "512M", es_config: {network.host: "0.0.0.0", discovery.zen.ping.unicast.hosts: "10.10.40.201:9300", http.port: 9200, transport.port: 9300, node.data: true, node.master: false,  xpack.security.transport.ssl.enabled: true, xpack.security.transport.ssl.verification_mode: none, xpack.security.transport.ssl.client_authentication: optional } }
+    - { role: elasticsearch, es_instance_name: "{{ inventory_hostname }}", es_heap_size: "3072M", es_config: {network.host: "0.0.0.0", discovery.zen.ping.unicast.hosts: "10.10.40.201:9300", http.port: 9200, transport.port: 9300, node.data: true, node.master: false,  xpack.security.enabled: false} }
   vars:
-    es_enable_http_ssl: true
-    es_api_basic_auth_username: elastic
+  #  es_enable_http_ssl: true
+  #  es_api_basic_auth_username: elastic
     #todo: set this in an intelligent way
-    es_api_basic_auth_password: changeme
-    es_ssl_key: /etc/ssl/private/ssl-cert-snakeoil.key
-    es_ssl_certificate: /etc/ssl/certs/ssl-cert-snakeoil.pem
+  #  es_api_basic_auth_password: changeme
+  #  es_ssl_key: /etc/ssl/private/ssl-cert-snakeoil.key
+  #  es_ssl_certificate: /etc/ssl/certs/ssl-cert-snakeoil.pem
 
 
 - name: Finish Elastic install
