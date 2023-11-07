@@ -1,0 +1,7 @@
+## Do some things
+- hosts: domain_controller
+  gather_facts: True
+  roles:
+    - domain_controller
+  vars_files:
+    - /etc/ansible/secrets.yml
