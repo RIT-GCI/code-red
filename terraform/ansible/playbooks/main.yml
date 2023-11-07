@@ -5,8 +5,8 @@
 - name: "Generate ssh keys"
   ansible.builtin.import_playbook: generatesshkeys.yml
 
-- name: "Run elastic playbook"
-  ansible.builtin.import_playbook: installelastic.yml
+- name: "Run graylog playbook"
+  ansible.builtin.import_playbook: installgraylog.yml
 
 - name: "Create users"
   ansible.builtin.import_playbook: generateusers.yml

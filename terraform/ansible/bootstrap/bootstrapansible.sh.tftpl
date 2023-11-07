@@ -23,7 +23,7 @@ apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 93C4A3FD7BB9C367
 apt update
 
 #Install Ansible
-apt install -y ansible python3-storm python3-pip
+apt install -y ansible python3-storm python3-pip git
 
 python3 -m pip install stormssh
 
@@ -33,15 +33,10 @@ cat <<EOF > /root/.ssh/config
 Host *
     StrictHostKeyChecking accept-new
 
-Host elastic*
+Host graylog
     User root
     IdentityFile /root/.ssh/id_bootstrap
-
-Host elasticmaster
-    HostName ${ips.elasticsearch}
-
-Host elasticdata1
-    HostName ${ips.elasticsearchdata1}
+    HostName 10.10.40.201
 EOF
 
 cat <<EOF > /root/.ssh/id_bootstrap
@@ -72,18 +67,8 @@ EOF
 
 %{ endfor }
 
-#add elasticsearch roles
-#Note that this role forces elastic 7.0 specifically, which is not the latest version, even of this release.
-#Forking the role in the future has been considered, but is probably not worthwhile for this scenario and introduces
-#the risk of breaking changes.
-cat <<EOF > /root/ansible/requirements.yml
-- name: elasticsearch
-  src: https://github.com/elastic/ansible-elasticsearch.git
-EOF
-ansible-galaxy install -r /root/ansible/requirements.yml
-
-#generate a snakeoil cert for elastic
-openssl req -x509 -nodes -days 3650 -newkey ED25519 -keyout /etc/ssl/private/ssl-cert-snakeoil.key -out /etc/ssl/certs/ssl-cert-snakeoil.pem -subj "/C=US/ST=Nuuuuuuu yawk/L=rock /O=fizzy wizzy electrocity/OU=code/CN=red/emailAddress=gidooo@mail.rit.edu"
+#add graylog role
+ansible-galaxy install graylog2.graylog
 
 # Create hosts file
 cat <<EOF > /etc/ansible/hosts
