@@ -11,7 +11,7 @@ resource "openstack_networking_port_v2" "domainControllerPortEnterpriseLAN" {
 
 resource "openstack_compute_instance_v2" "DomainController" {
   name              = "DomainController"
-  image_name        = "WinSrv2019Core-17763-2022"
+  image_name        = "WinSrv2019-17763-2022"
   flavor_name       = "xxlarge"
   key_pair			= "skp"
   security_groups   = ["default"]
@@ -41,9 +41,3 @@ resource "openstack_compute_instance_v2" "DomainController" {
 
 		</powershell>
 		EOF
-
-#  provisioner "local-exec" {
-#     working_dir = "./"
-#     command = "sleep 120; sed -i '' 's/PUBLICIP/${aws_instance.windows_2016_dc.public_ip}/g' hosts;ansible-playbook -i hosts playbooks/dc01-instance.yml"
-#   }
-}
