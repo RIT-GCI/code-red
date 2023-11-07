@@ -7,14 +7,14 @@
         name: gnupg2
         state: present
 #add gpg key from mongodb repo
-    - name: add gpg key from mongodb repo
-      apt_key:
-        url:  https://pgp.mongodb.com/server-7.0.asc
-        state: present
+    - name: add gpg key for mongodb repo
+      ansible.builtin.get_url:
+              url:  https://pgp.mongodb.com/server-7.0.asc
+              dest: /usr/share/keyrings/mongo.asc
 #install mongodb community edition from ppa
     - name: install mongodb community edition from ppa
       apt_repository:
-        repo: deb https://repo.mongodb.org/apt/ubuntu bionic/mongodb-org/4.4 multiverse
+        repo: deb [signed-by=/usr/share/keyrings/mongo.asc]  https://repo.mongodb.org/apt/debian bullseye/mongodb-org/4.4 multiverse
         state: present
         filename: mongodb-org-4.4.list
         update_cache: yes
