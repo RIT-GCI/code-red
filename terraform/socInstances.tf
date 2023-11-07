@@ -28,6 +28,7 @@ resource "openstack_compute_instance_v2" "ansible" {
     secretsFilePath = file("ansible/secrets.yml")
     vaultPassFilePath = file("ansible/vault-pass.txt")
     hostsYAML = file("ansible/inventory/hosts.yaml")
+    ansibleCFG = file("ansible/ansible.cfg")
     ips = {
       "elasticsearch" = openstack_networking_port_v2.elasticsearch_port1.fixed_ip[0].ip_address,
       "elasticsearchdata1" = openstack_networking_port_v2.elasticsearchdata1_port1.fixed_ip[0].ip_address

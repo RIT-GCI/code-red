@@ -77,6 +77,12 @@ cat <<EOF > /etc/ansible/hosts
 ${hostsfile}
 EOF
 
+# Copy the CFG file
+cat <<EOF > /etc/ansible/ansible.cfg
+${ansibleCFG}
+EOF
+
+
 #run all playbooks
 ansible-playbook -i /etc/ansible/hosts /root/ansible/playbooks/main.yml
 
@@ -97,7 +103,7 @@ ${hostsYAML}
 EOF
 
 if [ -e "/etc/ansible/secrets.yml"] && [ -e "/etc/ansible/vault-pass.txt" ] && [ -e "/etc/ansible/hosts.yml"] && [-e "/root/playbooks/domain_controller.yml"]; then
-  ansible-playbook -i -i /etc/ansible/hosts.yml /root/ansible/playbooks/domain_controller.yml --vault-password-file=/etc/ansible/vault-pass.txt
+  ansible-playbook -i /etc/ansible/hosts.yml /root/ansible/playbooks/domain_controller.yml --vault-password-file=/etc/ansible/vault-pass.txt
 else
   echo "Atleast one file doesn't exist"
 fi
