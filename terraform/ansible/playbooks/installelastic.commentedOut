@@ -1,0 +1,20 @@
+# - name: Configure Elasticsearch Master
+#   hosts: elasticmaster
+#   roles:
+#     - { role: elasticmaster, es_instance_name: "elasticsearch", es_heap_size: "768M", es_config: {network.host: "_eth0_", http.port: 9200, transport.tcp.port: 9300, node.data: false, node.master: true, bootstrap.mlockall: true } }
+#   become: true
+
+#   tasks:
+#   - name: Install Elastic
+#     ansible.builtin.import_playbook: installelastictasks.yml
+
+
+# - name: Configure Elasticsearch Data Nodes
+#   hosts: elasticdata
+#   roles:
+#     - { role: elasticdata, es_instance_name: "elasticdata1", es_heap_size: "768M", es_config: {network.host: "_eth0_", discovery.zen.ping.unicast.hosts: "10.10.40.201:9300", http.port: 9200, transport.tcp.port: 9300, node.data: true, node.master: false, bootstrap.mlockall: true } }
+#   become: true
+
+#   tasks:
+#   - name: Install Elastic
+#     ansible.builtin.import_playbook: installelastictasks.yml
