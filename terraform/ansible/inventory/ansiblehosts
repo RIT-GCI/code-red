@@ -1,6 +1,1 @@
-[elastic]
-elasticmaster
-elasticdata1
-
-[elasticdata]
-elasticdata1
+graylog

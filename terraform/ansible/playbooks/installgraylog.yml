@@ -1,0 +1,69 @@
+- name: install graylog dependencies
+  hosts: graylog
+  tasks:
+#install gpg
+    - name: install gpg
+      apt:
+        name: gnupg2
+        state: present
+#add gpg key from mongodb repo
+    - name: add gpg key for mongodb repo
+      ansible.builtin.get_url:
+              url:  https://pgp.mongodb.com/server-7.0.asc
+              dest: /usr/share/keyrings/mongo.asc
+#install mongodb community edition from ppa
+    - name: install mongodb community edition from ppa
+      apt_repository:
+        repo: deb [signed-by=/usr/share/keyrings/mongo.asc]  https://repo.mongodb.org/apt/debian bullseye/mongodb-org/4.4 multiverse
+        state: present
+        filename: mongodb-org-4.4.list
+        update_cache: yes
+      tags:
+        - "mongodb"
+
+- hosts: graylog
+  become: True
+  vars:
+    #Elasticsearch vars
+    es_major_version: "7.x"
+    es_version: "7.10.2"
+    es_enable_xpack: False
+    es_instance_name: "graylog"
+    es_heap_size: "3g"
+    es_config:
+      node.name: "graylog"
+      cluster.name: "graylog"
+      http.port: 9200
+      transport.tcp.port: 9300
+      network.host: "127.0.0.1"
+      discovery.seed_hosts: "localhost:9300"
+      cluster.initial_master_nodes: "graylog"
+    oss_version: True
+    es_action_auto_create_index: False
+
+    #Graylog vars
+    graylog_version: 4.2
+    graylog_install_java: True
+    #todo: don't harcode this
+    graylog_password_secret: "QFU7zlVuhSZ8ChIogdsD3bTllMFjMpP8O5xRrexy243KYvdHXWBBXcxPVL4a1hDDmXahwMHIfdG7IbGRnIFQr8OIbX4UnO9o" 
+    # 6a9019b9e69ce9614774bf649e6fa3c8fe9880f0b3b944e68dc1e8f797e75c21
+    graylog_root_password_sha2: "69207d6f733e7398b24fde72eb00568b6feed9802bd2e041692fdf37cd1b793b"
+    graylog_http_bind_address: "{{ ansible_default_ipv4.address }}:9000"
+    graylog_http_publish_uri: "http://{{ ansible_default_ipv4.address }}:9000/"
+    graylog_http_external_uri: "http://{{ ansible_default_ipv4.address }}:9000/"
+
+  roles:
+    - role: "graylog2.graylog"
+      tags:
+        - "graylog"
+
+
+
+- name: Finish Graylog install
+  hosts: graylog
+  tasks:
+    - name: Add Ansible SSH key
+      authorized_key:
+        user: root
+        key: "{{ lookup('file', '~/.ssh/id_graylog.pub') }}"
+        state: present

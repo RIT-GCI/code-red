@@ -16,7 +16,7 @@
     - name: Deploy ashim ssh key
       ansible.posix.authorized_key:
         user: ashim
-        key: "{{ lookup('file', '/root/ssh_keys/id_ashim.pub') }}"
+        key: "{{ lookup('file', '/root/ansible/ssh_keys/id_ashim.pub') }}"
         state: present
 
 # Create gido user
@@ -33,5 +33,5 @@
     - name: Deploy gido5731 ssh key
       ansible.posix.authorized_key:
         user: gido5731
-        key: "{{ lookup('file', '/root/ssh_keys/id_gido5731.pub') }}"
+        key: "{{ lookup('file', '/root/ansible/ssh_keys/id_gido5731.pub') }}"
         state: present

@@ -10,8 +10,9 @@ cat <<EOF > /root/.ssh/authorized_keys
 ${bootstrapsshpubkey}
 EOF
 
+sed -i 's|http://deb.debian.org|http://mirror.rit.edu|g' /etc/apt/sources.list
 apt update
 
 #Allow SSH access for root
-sed -i 's/PermitRootLogin no/PermitRootLogin prohibit-password/g' /etc/ssh/sshd_config
+echo "PermitRootLogin prohibit-password" >> /etc/ssh/sshd_config
 systemctl restart sshd
