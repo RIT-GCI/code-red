@@ -69,3 +69,9 @@ variable "ansible_password"{
     type        = string
     default     = "ansible"
 }
+
+variable "ansible_ip_address"{
+    description = "IP Address for the ansible instance"
+    type        = string
+    default     = "10.10.40.250"
+}
