@@ -1,7 +1,5 @@
 domain_controller:
   hosts: 10.10.20.254
-  vars_files:
-    - /etc/ansible/secrets.yml
   vars:
     ansible_user: "{{ windows.ansible_user }}"
     ansible_password: "{{ windows.ansible_password }}"

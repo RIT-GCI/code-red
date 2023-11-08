@@ -53,6 +53,12 @@ chmod 600 /root/.ssh/id_bootstrap
 # apparently filename consists of the actual filepath relative to terraform root
 mkdir -p /root/ansible/playbooks
 
+# make the directory for the variables
+mkdir -p /root/ansible/variables
+
+# make configuration directory
+mkdir -p /etc/ansible
+
 # loop through all playbooks in a template and copy them to the VM
 %{ for playbook in playbooks }
 cat <<EOF > /root/${playbook.filename}
@@ -82,6 +88,11 @@ cat <<EOF > /etc/ansible/ansible.cfg
 ${ansibleCFG}
 EOF
 
+%{ for variable_file in variable_files }
+cat <<EOF > /root/${variable_file.filename}
+${variable_file.content}
+EOF
+%{ endfor }
 
 #run all playbooks
 ansible-playbook -i /etc/ansible/hosts /root/ansible/playbooks/main.yml
@@ -94,16 +105,12 @@ cat <<EOF > /etc/ansible/secrets.yml
 ${secretsFilePath}
 EOF
 
-cat <<EOF > /etc/ansible/vault-pass.txt
-${vaultPassFilePath}
-EOF
-
 cat <<EOF > /etc/ansible/hosts.yml
 ${hostsYAML}
 EOF
 
-if [ -e "/etc/ansible/secrets.yml"] && [ -e "/etc/ansible/vault-pass.txt" ] && [ -e "/etc/ansible/hosts.yml"] && [-e "/root/playbooks/domain_controller.yml"]; then
-  ansible-playbook -i /etc/ansible/hosts.yml /root/ansible/playbooks/domain_controller.yml --vault-password-file=/etc/ansible/vault-pass.txt
+if [ -e /etc/ansible/hosts.yml ] && [ -e /root/ansible/playbooks/domain_controller.yml ]; then
+  ansible-playbook -i /etc/ansible/hosts.yml /root/ansible/playbooks/domain_controller.yml
 else
   echo "Atleast one file doesn't exist"
 fi

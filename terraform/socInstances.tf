@@ -13,7 +13,7 @@ resource "openstack_networking_port_v2" "ansible_port1" {
 resource "openstack_compute_instance_v2" "ansible" {
   name              = "ansible"
   image_name        = "DebianBullseye11"
-  flavor_name       = "small"
+  flavor_name       = "large"
   key_pair          = "gframe"
   security_groups   = ["default"]
 
@@ -24,9 +24,12 @@ resource "openstack_compute_instance_v2" "ansible" {
                         filename = f
                         content = file(f)
                    }]
+    variable_files = [for f in fileset(path.module, "ansible/variables/*.yml"): {
+                        filename = f
+                        content = file(f)
+                   }]
     "hostsfile" = file("ansible/inventory/ansiblehosts")
     secretsFilePath = file("ansible/secrets.yml")
-    vaultPassFilePath = file("ansible/vault-pass.txt")
     hostsYAML = file("ansible/inventory/hosts.yaml")
     ansibleCFG = file("ansible/ansible.cfg")
     ips = {
