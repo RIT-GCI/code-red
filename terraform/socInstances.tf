@@ -56,7 +56,7 @@ resource "openstack_compute_instance_v2" "graylog" {
   name              = "graylog"
   image_name        = "DebianBullseye11"
   #This will be increased as we need
-  flavor_name       = "medium"
+  flavor_name       = "xxlarge"
   key_pair          = "gframe"
   security_groups   = ["default"]
 
