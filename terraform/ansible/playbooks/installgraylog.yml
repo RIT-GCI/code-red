@@ -1,5 +1,6 @@
 - name: install graylog dependencies
   hosts: graylog
+  become: yes
   tasks:
 #install gpg
     - name: install gpg
@@ -9,22 +10,22 @@
 #add gpg key from mongodb repo
     - name: add gpg key for mongodb repo
       ansible.builtin.apt_key:
-        url:  https://pgp.mongodb.com/server-7.0.asc
+        url:  https://pgp.mongodb.com/server-6.0.asc
         state: present
 
 #install mongodb community edition from ppa
     - name: add apt repository to sources
       apt_repository:
-        repo: deb http://repo.mongodb.org/apt/debian bullseye/mongodb-org/7.0 main
+        repo: deb http://repo.mongodb.org/apt/debian bullseye/mongodb-org/6.0 main
         state: present
-        filename: mongodb-org-7.0.list
+        filename: mongodb-org-6.0.list
         update_cache: yes
       tags:
         - "mongodb"
 
     - name: install mongo-db
       apt:
-        name: mongodb-org
+        name: mongodb-org=6.0.11
         update_cache: yes
         state: present
 
@@ -36,7 +37,7 @@
     es_version: "7.10.2"
     es_enable_xpack: False
     es_instance_name: "graylog"
-    es_heap_size: "3g"
+    es_heap_size: "30g"
     es_config:
       node.name: "graylog"
       cluster.name: "graylog"
@@ -49,15 +50,15 @@
     es_action_auto_create_index: False
 
     #Graylog vars
-    graylog_version: 4.2
+    graylog_version: 5.2
     graylog_install_java: True
     #todo: don't harcode this
     graylog_password_secret: "QFU7zlVuhSZ8ChIogdsD3bTllMFjMpP8O5xRrexy243KYvdHXWBBXcxPVL4a1hDDmXahwMHIfdG7IbGRnIFQr8OIbX4UnO9o"
     # 6a9019b9e69ce9614774bf649e6fa3c8fe9880f0b3b944e68dc1e8f797e75c21
     graylog_root_password_sha2: "69207d6f733e7398b24fde72eb00568b6feed9802bd2e041692fdf37cd1b793b"
-    graylog_http_bind_address: "{{ ansible_default_ipv4.address }}:9000"
-    graylog_http_publish_uri: "http://{{ ansible_default_ipv4.address }}:9000/"
-    graylog_http_external_uri: "http://{{ ansible_default_ipv4.address }}:9000/"
+    graylog_http_bind_address: "10.10.40.201:9000"
+    graylog_http_publish_uri: "http://10.10.40.201:9000/"
+    graylog_http_external_uri: "http://10.10.40.201:9000/"
 
   roles:
     - role: "graylog2.graylog"
