@@ -14,9 +14,9 @@
 #install mongodb community edition from ppa
     - name: install mongodb community edition from ppa
       apt_repository:
-        repo: deb [signed-by=/usr/share/keyrings/mongo.asc]  https://repo.mongodb.org/apt/debian bullseye/mongodb-org/4.4 multiverse
+        repo: deb [signed-by=/usr/share/keyrings/mongo.asc]  https://repo.mongodb.org/apt/debian bullseye/mongodb-org/7.0 multiverse
         state: present
-        filename: mongodb-org-4.4.list
+        filename: mongodb-org-7.0.list
         update_cache: yes
       tags:
         - "mongodb"
@@ -45,7 +45,7 @@
     graylog_version: 4.2
     graylog_install_java: True
     #todo: don't harcode this
-    graylog_password_secret: "QFU7zlVuhSZ8ChIogdsD3bTllMFjMpP8O5xRrexy243KYvdHXWBBXcxPVL4a1hDDmXahwMHIfdG7IbGRnIFQr8OIbX4UnO9o" 
+    graylog_password_secret: "QFU7zlVuhSZ8ChIogdsD3bTllMFjMpP8O5xRrexy243KYvdHXWBBXcxPVL4a1hDDmXahwMHIfdG7IbGRnIFQr8OIbX4UnO9o"
     # 6a9019b9e69ce9614774bf649e6fa3c8fe9880f0b3b944e68dc1e8f797e75c21
     graylog_root_password_sha2: "69207d6f733e7398b24fde72eb00568b6feed9802bd2e041692fdf37cd1b793b"
     graylog_http_bind_address: "{{ ansible_default_ipv4.address }}:9000"
