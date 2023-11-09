@@ -1,5 +1,14 @@
-domain_controller:
-  hosts: 10.10.20.254
+linux:
+  hosts: graylog
+
+windows:
+  hosts: domain_controller
+
+domain_controllers:
+  hosts:
+    dc01:
+      ansible_host: 10.10.20.254
+
   vars:
     ansible_user: "{{ windows.ansible_user }}"
     ansible_password: "{{ windows.ansible_password }}"
