@@ -8,18 +8,25 @@
         state: present
 #add gpg key from mongodb repo
     - name: add gpg key for mongodb repo
-      ansible.builtin.get_url:
-              url:  https://pgp.mongodb.com/server-7.0.asc
-              dest: /usr/share/keyrings/mongo.asc
+      ansible.builtin.apt_key:
+        url:  https://pgp.mongodb.com/server-7.0.asc
+        state: present
+
 #install mongodb community edition from ppa
-    - name: install mongodb community edition from ppa
+    - name: add apt repository to sources
       apt_repository:
-        repo: deb [signed-by=/usr/share/keyrings/mongo.asc]  https://repo.mongodb.org/apt/debian bullseye/mongodb-org/7.0 multiverse
+        repo: deb http://repo.mongodb.org/apt/debian bullseye/mongodb-org/7.0 main
         state: present
         filename: mongodb-org-7.0.list
         update_cache: yes
       tags:
         - "mongodb"
+
+    - name: install mongo-db
+      apt:
+        name: mongodb-org
+        update_cache: yes
+        state: present
 
 - hosts: graylog
   become: True
