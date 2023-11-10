@@ -1,7 +1,7 @@
 # Playbook to generate users for Ashim and I
 ---
 - name: addusers
-  hosts: linux
+  hosts: linux localhost
   tasks:
     - name: Create User for Ashim
       ansible.builtin.user:
