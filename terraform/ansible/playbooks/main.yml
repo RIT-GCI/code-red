@@ -1,16 +1,14 @@
 - name: "Main playbook that executes subplaybooks"
   hosts: localhost
-  become: true
+  
+- name: "Create users"
+  ansible.builtin.import_playbook: generateusers.yml
 
 - name: "Generate ssh keys"
   ansible.builtin.import_playbook: generatesshkeys.yml
 
 - name: "Run graylog playbook"
   ansible.builtin.import_playbook: installgraylog.yml
-
-- name: "Create users"
-  ansible.builtin.import_playbook: generateusers.yml
-
 
 #FINAL PLAYBOOK: Set SSH keys to be not-bootstrap
 - name: "Run setsshkeys playbook"
