@@ -3,5 +3,6 @@ graylog
 [linux]
 graylog
 
+
 [windows]
 domain_controller

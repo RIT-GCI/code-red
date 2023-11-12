@@ -9,6 +9,13 @@ resource "openstack_networking_port_v2" "domainControllerPortEnterpriseLAN" {
   }
 }
 
+
+#Add ashim_key as skp so it stops erroring
+resource "openstack_compute_keypair_v2" "skp" {
+  name       = "skp"
+  public_key = file("ansible/ssh_keys/id_ashim.pub")
+}
+
 resource "openstack_compute_instance_v2" "DomainController" {
   name              = "DomainController"
   image_name        = "WinSrv2019-17763-2022"
