@@ -1,5 +1,11 @@
 - name: "Main playbook that executes subplaybooks"
-  hosts: localhost
+  hosts: localhost linux
+  #apply linux role to localhost
+  tasks:
+  - include_role: 
+      name: linux
+
+
   
 - name: "Create users"
   ansible.builtin.import_playbook: generateusers.yml

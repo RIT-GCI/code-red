@@ -28,6 +28,32 @@
         name: mongodb-org=6.0.11
         update_cache: yes
         state: present
+    #configure the volume at /dev/disk/by-label/logvol for graylog
+    - name: create volume for graylog
+      filesystem:
+        fstype: ext4
+        dev: /dev/disk/by-label/logvol
+        opts: defaults
+      tags:
+        - "graylog"
+    #mount the volume at /opt/logvol
+    - name: mount volume for graylog
+      mount:
+        path: /opt/logvol
+        src: /dev/disk/by-label/logvol
+        fstype: ext4
+        opts: defaults
+        state: mounted
+      tags:
+        - "graylog"
+    - name: create bind mount for mongodb
+      mount:
+        path: /opt/logvol/graylog/mongodb
+        src: /var/lib/mongodb
+        fstype: none
+        opts: bind
+        state: mounted
+
 
 - hosts: graylog
   become: True
@@ -60,6 +86,12 @@
     graylog_http_publish_uri: "http://10.10.40.201:9000/"
     graylog_http_external_uri: "http://10.10.40.201:9000/"
 
+    #configure paths to use the volume
+    graylog_data_dir: "/opt/logvol/graylog/data"
+    graylog_message_journal_dir: "/opt/logvol/graylog/journal"
+    #this one doesn't work?? Just bind-mounting it above
+    #graylog_mongodb_data_path: "/opt/logvol/graylog/mongodb"
+
   roles:
     - role: "graylog2.graylog"
       tags:
@@ -75,3 +107,51 @@
         user: root
         key: "{{ lookup('file', '~/.ssh/id_graylog.pub') }}"
         state: present
+  
+    - name: "Add syslog iptables rules"
+      ansible.builtin.iptables:
+        table: nat
+        chain: PREROUTING
+        protocol: udp
+        destination_port: 514
+        jump: REDIRECT
+        to_ports: 1514
+        comment: Redirect rsyslog to 1514
+    - name: "Add syslog iptables rules for local traffic"
+      ansible.builtin.iptables:
+        table: nat
+        chain: OUTPUT
+        protocol: udp
+        destination_port: 514
+        jump: REDIRECT
+        to_ports: 1514
+        comment: Redirect rsyslog locally to 1514
+    - name: run curl command to add syslog listener
+      #note that the authentication here is the previously defined password in base64. The decoded version of this is below:
+      #admin:6a9019b9e69ce9614774bf649e6fa3c8fe9880f0b3b944e68dc1e8f797e75c21
+      #this isn't particularly secure, this is probably a job for vault.
+      ansible.builtin.shell: >-
+        curl 'http://10.10.40.201:9000/api/system/inputs' 
+        -X POST 
+        -H 'Content-Type: application/json' 
+        -H 'X-Requested-By: Graylog API Browser' 
+        -H 'Authorization: Basic YWRtaW46NmE5MDE5YjllNjljZTk2MTQ3NzRiZjY0OWU2ZmEzYzhmZTk4ODBmMGIzYjk0NGU2OGRjMWU4Zjc5N2U3NWMyMQ==' 
+        --data-raw 
+        '{
+          "title": "udprsyslog",
+          "global": true,
+          "type": "org.graylog2.inputs.syslog.udp.SyslogUDPInput",
+          "configuration": {
+            "expand_structured_data": true,
+            "recv_buffer_size": 262144,
+            "port": 1514,
+            "number_worker_threads": 64,
+            "timezone": "NotSet",
+            "override_source": null,
+            "charset_name": "UTF-8",
+            "force_rdns": false,
+            "allow_override_date": true,
+            "bind_address": "0.0.0.0",
+            "store_full_message": true
+          }
+        }'

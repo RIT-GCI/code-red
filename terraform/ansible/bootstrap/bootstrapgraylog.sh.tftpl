@@ -16,3 +16,7 @@ apt update
 #Allow SSH access for root
 echo "PermitRootLogin prohibit-password" >> /etc/ssh/sshd_config
 systemctl restart sshd
+
+
+#label the logging disk so we can find it later
+e2label /dev/disk/by-id/virtio-`echo ${logvolid} | cut -c -20` logvol
