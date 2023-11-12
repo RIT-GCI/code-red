@@ -32,6 +32,7 @@ resource "openstack_compute_instance_v2" "ansible" {
     secretsFilePath = file("ansible/secrets.yml")
     hostsYAML = file("ansible/inventory/hosts.yaml")
     ansibleCFG = file("ansible/ansible.cfg")
+    dns_entries = file("ansible/dns/dns_entries.csv")
     ips = {
       "graylog" = openstack_networking_port_v2.graylog_port1.fixed_ip[0].ip_address,
     }

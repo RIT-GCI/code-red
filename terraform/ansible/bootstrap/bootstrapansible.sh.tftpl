@@ -95,6 +95,12 @@ ${variable_file.content}
 EOF
 %{ endfor }
 
+mkdir -p /root/ansible/dns
+# Create the dns_entries.csv file
+cat <<EOF > /root/ansible/dns/dns_entries.csv
+${dns_entries}
+EOF
+
 #run all playbooks
 ansible-playbook -i /etc/ansible/hosts /root/ansible/playbooks/main.yml
 

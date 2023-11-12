@@ -47,8 +47,8 @@
 
   - name: reboot | Rebooting Server
     win_reboot:
-      reboot_timeout_sec: 300
-      shutdown_timeout: 300
+      reboot_timeout_sec: 600
+      shutdown_timeout: 600
 
   - name: Managing Domain Controller Membership
     win_domain_controller:
@@ -58,3 +58,27 @@
       safe_mode_password: "{{ windows['safe_mode_password'] }}"
       state: "{{ windows['state'] }}"
     register: _windows_domain_controller
+
+  # Read the CSV file
+  - name: Read DNS records from the CSV file
+    community.general.read_csv:
+      path: /root/ansible/dns/dns_entries.csv
+      fieldnames: Name,Type,Zone,Value
+      delimiter: ','
+    register: dns_entries
+    delegate_to: localhost
+
+  # Add records read from the csv file
+  - name: Add DNS Records
+    community.windows.win_dns_record:
+      name: "{{ item.Name }}"
+      zone: "{{ item.Zone }}"
+      type: "{{ item.Type }}"
+      value: "{{ item.Value }}"
+    loop: "{{ dns_entries.list }}"
+
+  - name: Restart DNS service
+    ansible.windows.win_service:
+      name: DNS
+      state: restarted
+    changed_when: true
