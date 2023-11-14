@@ -5,5 +5,5 @@
   tasks:
     - name: Elastic ssh key
       community.crypto.openssh_keypair:
-        path: /root/.ssh/id_elastic
+        path: /root/.ssh/id_graylog
         type: ed25519

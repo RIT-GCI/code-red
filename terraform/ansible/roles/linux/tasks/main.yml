@@ -1,0 +1,6 @@
+- name: install packages for usage
+  #install kitty-terminfo via apt
+  apt:
+    name: kitty-terminfo
+    state: present
+  

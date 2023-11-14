@@ -1,0 +1,156 @@
+- name: install graylog dependencies
+  hosts: graylog
+  become: yes
+  tasks:
+#install gpg
+    - name: install gpg
+      apt:
+        name: gnupg2
+        state: present
+#add gpg key from mongodb repo
+    - name: add gpg key for mongodb repo
+      ansible.builtin.apt_key:
+        url:  https://pgp.mongodb.com/server-6.0.asc
+        state: present
+
+#install mongodb community edition from ppa
+    - name: add apt repository to sources
+      apt_repository:
+        repo: deb http://repo.mongodb.org/apt/debian bullseye/mongodb-org/6.0 main
+        state: present
+        filename: mongodb-org-6.0.list
+        update_cache: yes
+      tags:
+        - "mongodb"
+
+    - name: install mongo-db
+      apt:
+        name: mongodb-org=6.0.11
+        update_cache: yes
+        state: present
+    #configure the volume at /dev/disk/by-label/logvol for graylog
+    - name: create volume for graylog
+      filesystem:
+        fstype: ext4
+        dev: /dev/logvol
+      tags:
+        - "graylog"
+    #mount the volume at /opt/logvol
+    - name: mount volume for graylog
+      mount:
+        path: /opt/logvol
+        src: /dev/logvol
+        fstype: ext4
+        opts: defaults
+        state: mounted
+      tags:
+        - "graylog"
+    - name: create bind mount for mongodb
+      mount:
+        path: /opt/logvol/graylog/mongodb
+        src: /var/lib/mongodb
+        fstype: none
+        opts: bind
+        state: mounted
+
+
+- hosts: graylog
+  become: True
+  vars:
+    #Elasticsearch vars
+    es_major_version: "7.x"
+    es_version: "7.10.2"
+    es_enable_xpack: False
+    es_instance_name: "graylog"
+    es_heap_size: "30g"
+    es_config:
+      node.name: "graylog"
+      cluster.name: "graylog"
+      http.port: 9200
+      transport.tcp.port: 9300
+      network.host: "127.0.0.1"
+      discovery.seed_hosts: "localhost:9300"
+      cluster.initial_master_nodes: "graylog"
+    oss_version: True
+    es_action_auto_create_index: False
+
+    #Graylog vars
+    graylog_version: 5.2
+    graylog_install_java: True
+    #todo: don't harcode this
+    graylog_password_secret: "QFU7zlVuhSZ8ChIogdsD3bTllMFjMpP8O5xRrexy243KYvdHXWBBXcxPVL4a1hDDmXahwMHIfdG7IbGRnIFQr8OIbX4UnO9o"
+    # 6a9019b9e69ce9614774bf649e6fa3c8fe9880f0b3b944e68dc1e8f797e75c21
+    graylog_root_password_sha2: "69207d6f733e7398b24fde72eb00568b6feed9802bd2e041692fdf37cd1b793b"
+    graylog_http_bind_address: "10.10.40.201:9000"
+    graylog_http_publish_uri: "http://10.10.40.201:9000/"
+    graylog_http_external_uri: "http://10.10.40.201:9000/"
+
+    #configure paths to use the volume
+    graylog_data_dir: "/opt/logvol/graylog/data"
+    graylog_message_journal_dir: "/opt/logvol/graylog/journal"
+    #this one doesn't work?? Just bind-mounting it above
+    #graylog_mongodb_data_path: "/opt/logvol/graylog/mongodb"
+
+  roles:
+    - role: "graylog2.graylog"
+      tags:
+        - "graylog"
+
+
+
+- name: Finish Graylog install
+  hosts: graylog
+  tasks:
+    - name: Add Ansible SSH key
+      authorized_key:
+        user: root
+        key: "{{ lookup('file', '~/.ssh/id_graylog.pub') }}"
+        state: present
+  
+    - name: "Add syslog iptables rules"
+      ansible.builtin.iptables:
+        table: nat
+        chain: PREROUTING
+        protocol: udp
+        destination_port: 514
+        jump: REDIRECT
+        to_ports: 1514
+        comment: Redirect rsyslog to 1514
+    - name: "Add syslog iptables rules for local traffic"
+      ansible.builtin.iptables:
+        table: nat
+        chain: OUTPUT
+        protocol: udp
+        destination_port: 514
+        jump: REDIRECT
+        to_ports: 1514
+        comment: Redirect rsyslog locally to 1514
+    - name: run curl command to add syslog listener
+      #note that the authentication here is the previously defined password in base64. The decoded version of this is below:
+      #admin:6a9019b9e69ce9614774bf649e6fa3c8fe9880f0b3b944e68dc1e8f797e75c21
+      #this isn't particularly secure, this is probably a job for vault.
+      ansible.builtin.shell: >-
+        curl 'http://10.10.40.201:9000/api/system/inputs' 
+        -X POST 
+        -H 'Content-Type: application/json' 
+        -H 'X-Requested-By: Graylog API Browser' 
+        -H 'Authorization: Basic YWRtaW46NmE5MDE5YjllNjljZTk2MTQ3NzRiZjY0OWU2ZmEzYzhmZTk4ODBmMGIzYjk0NGU2OGRjMWU4Zjc5N2U3NWMyMQ==' 
+        --data-raw 
+        '{
+          "title": "udprsyslog",
+          "global": true,
+          "type": "org.graylog2.inputs.syslog.udp.SyslogUDPInput",
+          "configuration": {
+            "expand_structured_data": true,
+            "recv_buffer_size": 262144,
+            "port": 1514,
+            "number_worker_threads": 64,
+            "timezone": "NotSet",
+            "override_source": null,
+            "charset_name": "UTF-8",
+            "force_rdns": false,
+            "allow_override_date": true,
+            "bind_address": "0.0.0.0",
+            "store_full_message": true
+          }
+        }'

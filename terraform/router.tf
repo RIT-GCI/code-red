@@ -82,11 +82,6 @@ resource "openstack_networking_router_interface_v2" "router_soc_lan_interface"{
   subnet_id = openstack_networking_subnet_v2.soc_lan.id
 }
 
-#create floating IP
-resource "openstack_networking_floatingip_v2" "fip1" {
-  pool = "external249"
-}
-
 
 # resource "openstack_networking_router_route_v2" "router_route_1" {
 #   depends_on       = [openstack_networking_router_interface_v2.router_internal_interface]

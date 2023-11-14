@@ -3,10 +3,10 @@
   become: true
 
   tasks:
-    # set elastic ssh key to id_elastic in .ssh/config
-    - name: set elastic ssh keys
+    # set graylog ssh key to id_graylog in .ssh/config
+    - name: set graylog ssh keys
       community.general.ssh_config:
         user: root
-        host: "elastic"
-        identity_file: "/root/.ssh/id_elastic"
+        host: "graylog"
+        identity_file: "/root/.ssh/id_graylog"
         state: present

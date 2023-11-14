@@ -1,0 +1,128 @@
+#!/bin/sh
+
+# This script is built for Debian 11
+
+DEBIAN_FRONTEND=noninteractive
+
+#Add a user for console login
+#This password is relatively weak (because openstack console doesn't support paste) and shouldn't be kept long-term
+#useradd -m -p '$6$sBEMB6F9QRr8JqbP$N30I.atrNu7rTlvy/0daShAJDd3no8ffP5Uvd6Cd1AJz6.6hVNithcFD3jHXTQk1Ui0G7YABXp8GvDzj24YLn.' gido5731
+#usermod -aG sudo gido5731
+
+#prereqs
+#set a less miserably slow mirror:
+sed -i 's|http://deb.debian.org|http://mirror.rit.edu|g' /etc/apt/sources.list
+apt update
+# kitty-terminfo for gido's terminal, will be moved to an ansible config later.
+apt install -y gnupg2 kitty-terminfo git
+
+# Configure Ansible PPA
+# We use the PPA so all our updates are managed through apt rather than pip
+echo "deb http://ppa.launchpad.net/ansible/ansible/ubuntu focal main" > /etc/apt/sources.list.d/ansible.list
+apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 93C4A3FD7BB9C367
+apt update
+
+#Install Ansible
+apt install -y ansible python3-storm python3-pip git
+
+python3 -m pip install stormssh
+
+#Setup locale
+localectl set-locale en_US.UTF-8
+
+# Setup for SSH
+
+cat <<EOF > /root/.ssh/config
+Host *
+    StrictHostKeyChecking accept-new
+
+Host graylog
+    User root
+    IdentityFile /root/.ssh/id_bootstrap
+    HostName 10.10.40.201
+EOF
+
+cat <<EOF > /root/.ssh/id_bootstrap
+${bootstrapsshprivkey}
+EOF
+
+chmod 600 /root/.ssh/id_bootstrap
+
+# apparently filename consists of the actual filepath relative to terraform root
+mkdir -p /root/ansible/playbooks
+
+# make the directory for the variables
+mkdir -p /root/ansible/variables
+
+# make configuration directory
+mkdir -p /etc/ansible
+
+# loop through all playbooks in a template and copy them to the VM
+%{ for playbook in playbooks }
+cat <<EOF > /root/${playbook.filename}
+${playbook.content}
+EOF
+%{ endfor }
+
+mkdir -p /root/ansible/ssh_keys
+%{ for key in usersshkeys }
+cat <<EOF > /root/${key.filename}
+${key.content}
+EOF
+
+cat <<EOF >> /root/.ssh/authorized_keys
+${key.content}
+EOF
+
+%{ endfor }
+
+#add graylog role
+ansible-galaxy install graylog2.graylog
+
+#add rsyslog role
+ansible-galaxy install robertdebock.rsyslog
+
+# Create hosts file
+cat <<EOF > /etc/ansible/hosts
+${hostsfile}
+EOF
+
+# Copy the CFG file
+cat <<EOF > /etc/ansible/ansible.cfg
+${ansibleCFG}
+EOF
+
+%{ for variable_file in variable_files }
+cat <<EOF > /root/${variable_file.filename}
+${variable_file.content}
+EOF
+%{ endfor }
+
+# copy roles to /root/.ansible/roles
+%{ for role in roles }
+mkdir -p /root/.${role.dirname}
+cat <<EOF > /root/.${role.filename}
+${role.content}
+EOF
+%{ endfor }
+
+#run all playbooks
+ansible-playbook -i /etc/ansible/hosts /root/ansible/playbooks/main.yml
+
+
+##########################Initializing Domain Controller######################################################
+
+#run the DC playbooks if there is a secrets.yml and password-txt provided else skip
+cat <<EOF > /etc/ansible/secrets.yml
+${secretsFilePath}
+EOF
+
+cat <<EOF > /etc/ansible/hosts.yml
+${hostsYAML}
+EOF
+
+if [ -e /etc/ansible/hosts.yml ] && [ -e /root/ansible/playbooks/domain_controller.yml ]; then
+  ansible-playbook -i /etc/ansible/hosts.yml /root/ansible/playbooks/domain_controller.yml
+else
+  echo "Atleast one file doesn't exist"
+fi
