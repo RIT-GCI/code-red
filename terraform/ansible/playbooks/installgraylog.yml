@@ -32,7 +32,7 @@
     - name: create volume for graylog
       filesystem:
         fstype: ext4
-        dev: /dev/disk/by-label/logvol
+        dev: /dev/logvol
         opts: defaults
       tags:
         - "graylog"
@@ -40,7 +40,7 @@
     - name: mount volume for graylog
       mount:
         path: /opt/logvol
-        src: /dev/disk/by-label/logvol
+        src: /dev/logvol
         fstype: ext4
         opts: defaults
         state: mounted

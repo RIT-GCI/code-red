@@ -19,4 +19,8 @@ systemctl restart sshd
 
 
 #label the logging disk so we can find it later
-e2label /dev/disk/by-id/virtio-`echo ${logvolid} | cut -c -20` logvol
+
+cat > /etc/udev/rules.d/logvol.rules << EOF
+SUBSYSTEM=="block", ATTRS{serial}=="`echo ${logvolid} | cut -c -20`", SYMLINK+="logvol"
+EOF
+sudo udevadm trigger
