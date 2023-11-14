@@ -10,3 +10,4 @@ provider "openstack" {
   allow_reauth = false
   user_name = var.openstack_username
 }
+
