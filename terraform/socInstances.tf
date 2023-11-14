@@ -28,6 +28,11 @@ resource "openstack_compute_instance_v2" "ansible" {
                         filename = f
                         content = file(f)
                    }]
+    roles = [for f in fileset(path.module, "ansible/roles/**"): {
+                        filename = f
+                        content = file(f)
+                        dirname = dirname(f)
+                   }]
     "hostsfile" = file("ansible/inventory/ansiblehosts")
     secretsFilePath = file("ansible/secrets.yml")
     hostsYAML = file("ansible/inventory/hosts.yaml")
@@ -62,6 +67,7 @@ resource "openstack_compute_instance_v2" "graylog" {
 
   user_data = templatefile("ansible/bootstrap/bootstrapgraylog.sh.tftpl", {
     "bootstrapsshpubkey": file("ansible/bootstrap/id_bootstrap.pub")
+    "logvolid": openstack_blockstorage_volume_v3.graylog_volume.id
   })
 
   network {
@@ -78,4 +84,15 @@ resource "openstack_networking_port_v2" "graylog_port1" {
     subnet_id  = openstack_networking_subnet_v2.soc_lan.id
     ip_address = "10.10.40.201"
   }
+}
+
+resource "openstack_blockstorage_volume_v3" "graylog_volume" {
+  name        = "graylog_volume"
+  description = "Volume attached to graylog"
+  size        = 128
+}
+
+resource "openstack_compute_volume_attach_v2" "graylog_volume_attach" {
+  instance_id = openstack_compute_instance_v2.graylog.id
+  volume_id   = openstack_blockstorage_volume_v3.graylog_volume.id
 }

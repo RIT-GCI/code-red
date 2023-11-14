@@ -16,3 +16,11 @@ apt update
 #Allow SSH access for root
 echo "PermitRootLogin prohibit-password" >> /etc/ssh/sshd_config
 systemctl restart sshd
+
+
+#label the logging disk so we can find it later
+
+cat > /etc/udev/rules.d/logvol.rules << EOF
+SUBSYSTEM=="block", ATTRS{serial}=="`echo ${logvolid} | cut -c -20`", SYMLINK+="logvol"
+EOF
+sudo udevadm trigger

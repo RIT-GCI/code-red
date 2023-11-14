@@ -1,0 +1,9 @@
+dependencies:
+  #configure rsyslog
+  - role: robertdebock.rsyslog
+    rsyslog_remote: 10.10.40.201
+    rsyslog_remote_tcp: no
+    rsyslog_mods:
+      - imuxsock
+      - imjournal
+    rsyslog_omit_local_logging: no

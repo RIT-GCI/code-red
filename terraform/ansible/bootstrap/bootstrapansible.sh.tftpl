@@ -79,6 +79,9 @@ EOF
 #add graylog role
 ansible-galaxy install graylog2.graylog
 
+#add rsyslog role
+ansible-galaxy install robertdebock.rsyslog
+
 # Create hosts file
 cat <<EOF > /etc/ansible/hosts
 ${hostsfile}
@@ -92,6 +95,14 @@ EOF
 %{ for variable_file in variable_files }
 cat <<EOF > /root/${variable_file.filename}
 ${variable_file.content}
+EOF
+%{ endfor }
+
+# copy roles to /root/.ansible/roles
+%{ for role in roles }
+mkdir -p /root/.${role.dirname}
+cat <<EOF > /root/.${role.filename}
+${role.content}
 EOF
 %{ endfor }
 
