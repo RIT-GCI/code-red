@@ -33,7 +33,6 @@
       filesystem:
         fstype: ext4
         dev: /dev/logvol
-        opts: defaults
       tags:
         - "graylog"
     #mount the volume at /opt/logvol
