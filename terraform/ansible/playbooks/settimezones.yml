@@ -1,5 +1,5 @@
 - name: Set timezones on all nodes
-  hosts: all localhost
+  hosts: linux localhost
   become: true
 
   tasks:
