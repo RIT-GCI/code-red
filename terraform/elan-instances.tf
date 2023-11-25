@@ -14,7 +14,7 @@ resource "openstack_compute_instance_v2" "elan-winhost-01" {
   name              = "elan-winhost-01"
   image_name        = "Win11-21H2"
   flavor_name       = "medium"
-  key_pair			= "skp"
+  key_pair          = "skp"
   security_groups   = ["default"]
 
   network {
@@ -61,7 +61,7 @@ resource "openstack_compute_instance_v2" "elan-winsrv-01" {
   name              = "elan-winsrv-01"
   image_name        = "WinSrv2022-20348-2022"
   flavor_name       = "medium"
-  key_pair			= "skp"
+  key_pair          = "skp"
   security_groups   = ["default"]
 
   network {
