@@ -127,8 +127,9 @@ cat <<EOF > /etc/ansible/hosts.yml
 ${hostsYAML}
 EOF
 
-if [ -e /etc/ansible/hosts.yml ] && [ -e /root/ansible/playbooks/domain_controller.yml ]; then
+if [ -e /etc/ansible/hosts.yml ] && [ -e /root/ansible/playbooks/domain_controller.yml ] && [ -e /root/ansible/playbooks/domain_members.yml ]; then
   ansible-playbook -i /etc/ansible/hosts.yml /root/ansible/playbooks/domain_controller.yml
+  ansible-playbook -i /etc/ansible/hosts.yml /root/ansible/playbooks/domain_members.yml
 else
   echo "Atleast one file doesn't exist"
 fi

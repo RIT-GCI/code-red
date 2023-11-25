@@ -1,3 +1,5 @@
 ansible,A,codered.local,10.10.40.250
 dc01,A,codered.local,10.10.20.254
 graylog,A,codered.local,10.10.40.201
+elan-winhost-01,A,codered.local,10.10.20.32
+elan-winsrv-01,A,codered.local,10.10.20.16
