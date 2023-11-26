@@ -1,0 +1,5 @@
+## add hosts to the domain
+- hosts: domain_members
+  gather_facts: False
+  roles:
+    - domain_member
