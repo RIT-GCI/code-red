@@ -24,10 +24,6 @@ resource "openstack_compute_instance_v2" "ansible" {
                         filename = f
                         content = file(f)
                    }]
-    variable_files = [for f in fileset(path.module, "ansible/variables/*.yml"): {
-                        filename = f
-                        content = file(f)
-                   }]
     roles = [for f in fileset(path.module, "ansible/roles/**"): {
                         filename = f
                         content = file(f)

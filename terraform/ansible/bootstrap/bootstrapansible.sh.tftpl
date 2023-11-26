@@ -51,9 +51,6 @@ chmod 600 /root/.ssh/id_bootstrap
 # apparently filename consists of the actual filepath relative to terraform root
 mkdir -p /root/ansible/playbooks
 
-# make the directory for the variables
-mkdir -p /root/ansible/variables
-
 # make configuration directory
 mkdir -p /etc/ansible
 
@@ -91,12 +88,6 @@ EOF
 cat <<EOF > /etc/ansible/ansible.cfg
 ${ansibleCFG}
 EOF
-
-%{ for variable_file in variable_files }
-cat <<EOF > /root/${variable_file.filename}
-${variable_file.content}
-EOF
-%{ endfor }
 
 # copy roles to /root/.ansible/roles
 %{ for role in roles }
