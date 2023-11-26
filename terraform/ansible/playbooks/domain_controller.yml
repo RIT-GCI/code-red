@@ -1,5 +1,0 @@
-## Install Active Directory on Domain Controller
-- hosts: domain_controllers
-  gather_facts: False
-  roles:
-    - domain_controller

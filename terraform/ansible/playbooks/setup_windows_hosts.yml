@@ -1,0 +1,14 @@
+## Install Active Directory on Domain Controller
+- hosts: domain_controllers
+  gather_facts: False
+  roles:
+    - domain_controller
+    - common_windows
+
+
+## Add windows hosts to the domain
+- hosts: domain_members
+  gather_facts: False
+  roles:
+    - domain_member
+    - common_windows

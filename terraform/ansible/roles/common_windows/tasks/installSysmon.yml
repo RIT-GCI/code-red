@@ -19,15 +19,8 @@
 - name: Unzip the Sysmon Config Zip
   community.windows.win_unzip:
     src: C:\sysmon-modular.zip
-    dest: C:\
+    dest: C:\\
     delete_archive: yes
-
-- name: Merge all the configs into one file
-  ansible.windows.win_shell: |
-    . .\Merge-SysmonXml.ps1
-    Merge-AllSysmonXml -Path ( Get-ChildItem '[0-9]*\*.xml') -AsString | Out-File sysmonconfig.xml
-  args:
-    chdir: C:\sysmon-modular-master
 
 - name: Merge all the configs into one file
   ansible.windows.win_shell: |
