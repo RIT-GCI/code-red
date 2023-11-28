@@ -3,4 +3,8 @@
   apt:
     name: kitty-terminfo
     state: present
-  
+
+- name: Restart rsyslog
+  ansible.builtin.service:
+    name: "rsyslog"
+    state: restarted
