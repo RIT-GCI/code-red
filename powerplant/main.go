@@ -2,20 +2,51 @@ package main
 
 import (
 	"log"
-	"sync"
+	"math"
 	"time"
 
 	"github.com/simonvetter/modbus"
 )
 
+// Example handler object, passed to the NewServer() constructor above.
+type modbusHandler struct {
+	// these are here to hold client-provided (written) values, for both coils and
+	// holding registers
+	coils [100]bool
+
+	// holding registers are 16-bit values, so we use uint16
+	holdingRegisters [100]uint16
+}
+
+type powerplant struct {
+	// reactivity is the amount of powerplant output change per second
+	reactivity float32
+	// output is the current powerplant output
+	output float32
+	// target is the desired powerplant output
+	target float32
+	// safety is the maximum deviation from target allowed
+	// Operating range is always 50% of safety.
+	safety float32
+}
+
+var (
+	// plant is the powerplant object
+	// todo: store this in modbus somewhere
+	plant = &powerplant{
+		reactivity: 0,
+		output:     100,
+		target:     100,
+		safety:     20,
+	}
+)
+
 func main() {
 	var server *modbus.ModbusServer
 	var err error
-	var eh *exampleHandler
-	var ticker *time.Ticker
 
 	// create the handler object
-	eh = &exampleHandler{}
+	handler := &modbusHandler{}
 
 	// create the server object
 	server, err = modbus.NewServer(&modbus.ServerConfiguration{
@@ -25,33 +56,74 @@ func main() {
 		Timeout: 30 * time.Second,
 		// accept 5 concurrent connections max.
 		MaxClients: 5,
-	}, eh)
+	}, handler)
 	if err != nil {
 		log.Fatalln(err)
 	}
 
+	err = server.Start()
+	if err != nil {
+		log.Fatalln(err)
+	}
+	plant.updateOutput()
 }
 
-// Example handler object, passed to the NewServer() constructor above.
-type modbusHandler struct {
-	// this lock is used to avoid concurrency issues between goroutines, as
-	// handler methods are called from different goroutines
-	// (1 goroutine per client)
-	lock sync.RWMutex
+// implement RequestHandler
+func (h *modbusHandler) HandleDiscreteInputs(req *modbus.DiscreteInputsRequest) (
+	res []bool, err error) {
+	return nil, nil
+}
 
-	// simple uptime counter, incremented in the main() above and exposed
-	// as a 32-bit input register (2 consecutive 16-bit modbus registers).
-	uptime uint32
+func (h *modbusHandler) HandleInputRegisters(req *modbus.InputRegistersRequest) ([]uint16,
+	error) {
+	return nil, nil
+}
 
-	// these are here to hold client-provided (written) values, for both coils and
-	// holding registers
-	coils       [100]bool
-	holdingReg1 uint16
-	holdingReg2 uint16
+func (h *modbusHandler) HandleHoldingRegisters(req *modbus.HoldingRegistersRequest) (
+	res []uint16, err error) {
+	for i := -0; i < int(req.Quantity); i++ {
+		addr := req.Addr + uint16(i)
+		if addr >= uint16(len(h.holdingRegisters)) {
+			return nil, modbus.ErrIllegalDataAddress
+		}
 
-	// this is a 16-bit signed integer
-	holdingReg3 int16
+		res = append(res, h.holdingRegisters[addr])
+	}
+	return
+}
 
-	// this is a 32-bit unsigned integer
-	holdingReg4 uint32
+func (h *modbusHandler) HandleCoils(req *modbus.CoilsRequest) ([]bool, error) {
+	log.Printf("coils request: %#v", *req)
+	// This switch calls go functions for any modbus function desired.
+	switch req.Addr {
+	case 65:
+		// function to query powerplant output
+		if req.Quantity != 32 {
+			return nil, modbus.ErrIllegalDataAddress
+		}
+		return plant.queryOutputModbus()
+	default:
+		return nil, modbus.ErrIllegalFunction
+	}
+}
+
+// queryOutputModbus queries the powerplant output and returns a []bool and error
+// which is accepted by modbus
+func (p *powerplant) queryOutputModbus() (res []bool, err error) {
+	for i := 0; i < 32; i++ {
+		res = append(res, math.Float32bits(p.output)&(1<<uint(i)) != 0)
+	}
+	return
+}
+
+// updateOutput updates the powerplant output based on the target and reactivity.
+// The reactivity is added to the sine of the current time (minutes in the hour,
+// scaled to 0-1) to get the new output.
+func (p *powerplant) updateOutput() {
+	for {
+		p.output = p.output + p.reactivity + float32(.01*
+			math.Sin(float64(time.Now().Minute())/60.0*2*math.Pi))
+		log.Println("current output:", p.output)
+		time.Sleep(1 * time.Second)
+	}
 }
