@@ -26,7 +26,7 @@ type powerplant struct {
 	// target is the desired powerplant output
 	target float32
 	// safety is the maximum deviation from target allowed
-	// Operating range is always 50% of safety.
+	// Operating range is always 10% of safety.
 	safety float32
 }
 
