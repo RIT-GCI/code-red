@@ -131,7 +131,7 @@ func (p *powerplant) setReactivity(req *modbus.HoldingRegistersRequest) ([]uint1
 // scaled to 0-1) to get the new output.
 func (p *powerplant) updateOutput() {
 	for {
-		p.output = p.output + p.reactivity + float32(.05*
+		p.output = p.output + p.reactivity + float32(.2*
 			math.Sin((float64(
 				time.Now().Minute())+(float64(time.Now().Second())/
 				60.0))/60.0*2*math.Pi))
