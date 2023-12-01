@@ -83,10 +83,6 @@ func (h *modbusHandler) HandleInputRegisters(req *modbus.InputRegistersRequest) 
 // Not implemented
 func (h *modbusHandler) HandleHoldingRegisters(req *modbus.HoldingRegistersRequest) (
 	res []uint16, err error) {
-	return nil, nil
-}
-
-func (h *modbusHandler) HandleCoils(req *modbus.CoilsRequest) ([]bool, error) {
 	log.Printf("coils request: %#v", *req)
 	// This switch calls go functions for any modbus function desired.
 	switch req.Addr {
@@ -97,15 +93,21 @@ func (h *modbusHandler) HandleCoils(req *modbus.CoilsRequest) ([]bool, error) {
 	}
 }
 
-// queryOutputModbus queries the powerplant output and returns a []bool and error
+func (h *modbusHandler) HandleCoils(req *modbus.CoilsRequest) ([]bool, error) {
+	return nil, nil
+}
+
+// queryOutputModbus queries the powerplant output and returns a []uint16 and error
 // which is accepted by modbus
-func (p *powerplant) queryOutputModbus(quantity uint16) (res []bool, err error) {
-	if quantity > 32 {
+func (p *powerplant) queryOutputModbus(quantity uint16) (res []uint16, err error) {
+	if quantity > 2 {
 		return nil, modbus.ErrIllegalDataValue
 	}
-	for i := 0; i < int(quantity); i++ {
-		res = append(res, math.Float32bits(p.output)&(1<<uint(i)) != 0)
-	}
+
+	res = []uint16{uint16(math.Float32bits(p.output) >> 16),
+		uint16(math.Float32bits(p.output))}
+	// convert to two uint16s insde of res
+
 	return
 }
 

@@ -11,7 +11,7 @@ import (
 const (
 	targetpower = 100
 	// margin is 10% of safety range
-	margin               = 20 * .1
+	margin               = float32(20 * .1)
 	adjustment_step_size = 5
 )
 
@@ -32,22 +32,19 @@ func main() {
 		time.Sleep(1 * time.Second)
 
 		// get the data from the powerplant and parse it out
-		out, err := client.ReadCoils(65, 32)
+		out, err := client.ReadRegisters(65, 2, modbus.HOLDING_REGISTER)
 		if err != nil {
 			log.Fatalln(err)
 		}
 		// convert to float32
-		var outbits uint32
-		for i := len(out) - 1; i >= 0; i-- {
-			if out[i] {
-				outbits |= 1 << uint(i)
-			}
-		}
+		outbits := uint32(out[0])<<16 | uint32(out[1])
+
+		log.Println("outbits:", math.Float32frombits(outbits))
 
 		// Check the deviation from target
-		deviation := float64(targetpower) - float64(outbits)
+		deviation := float32(targetpower) - math.Float32frombits(outbits)
 		// if the deviation is greater than the margin, prepare to adjust
-		if math.Abs(deviation) < margin {
+		if float32(math.Abs(float64(deviation))) < margin {
 			// no adjustment needed
 			continue
 		}
