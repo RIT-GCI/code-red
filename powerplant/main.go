@@ -68,28 +68,22 @@ func main() {
 	plant.updateOutput()
 }
 
-// implement RequestHandler
+// Not implemented
 func (h *modbusHandler) HandleDiscreteInputs(req *modbus.DiscreteInputsRequest) (
 	res []bool, err error) {
 	return nil, nil
 }
 
+// Not implemented
 func (h *modbusHandler) HandleInputRegisters(req *modbus.InputRegistersRequest) ([]uint16,
 	error) {
 	return nil, nil
 }
 
+// Not implemented
 func (h *modbusHandler) HandleHoldingRegisters(req *modbus.HoldingRegistersRequest) (
 	res []uint16, err error) {
-	for i := -0; i < int(req.Quantity); i++ {
-		addr := req.Addr + uint16(i)
-		if addr >= uint16(len(h.holdingRegisters)) {
-			return nil, modbus.ErrIllegalDataAddress
-		}
-
-		res = append(res, h.holdingRegisters[addr])
-	}
-	return
+	return nil, nil
 }
 
 func (h *modbusHandler) HandleCoils(req *modbus.CoilsRequest) ([]bool, error) {
@@ -97,11 +91,7 @@ func (h *modbusHandler) HandleCoils(req *modbus.CoilsRequest) ([]bool, error) {
 	// This switch calls go functions for any modbus function desired.
 	switch req.Addr {
 	case 65:
-		// function to query powerplant output
-		if req.Quantity != 32 {
-			return nil, modbus.ErrIllegalDataAddress
-		}
-		return plant.queryOutputModbus()
+		return plant.queryOutputModbus(req.Quantity)
 	default:
 		return nil, modbus.ErrIllegalFunction
 	}
@@ -109,8 +99,11 @@ func (h *modbusHandler) HandleCoils(req *modbus.CoilsRequest) ([]bool, error) {
 
 // queryOutputModbus queries the powerplant output and returns a []bool and error
 // which is accepted by modbus
-func (p *powerplant) queryOutputModbus() (res []bool, err error) {
-	for i := 0; i < 32; i++ {
+func (p *powerplant) queryOutputModbus(quantity uint16) (res []bool, err error) {
+	if quantity > 32 {
+		return nil, modbus.ErrIllegalDataValue
+	}
+	for i := 0; i < int(quantity); i++ {
 		res = append(res, math.Float32bits(p.output)&(1<<uint(i)) != 0)
 	}
 	return
