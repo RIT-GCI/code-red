@@ -11,7 +11,8 @@ import (
 const (
 	targetpower = 100
 	// margin is 10% of safety range
-	margin               = float32(20 * .1)
+	//margin = float32(20 * .1)
+	margin               = 0
 	adjustment_step_size = 5
 )
 
@@ -34,7 +35,8 @@ func main() {
 		// get the data from the powerplant and parse it out
 		out, err := client.ReadRegisters(65, 2, modbus.HOLDING_REGISTER)
 		if err != nil {
-			log.Fatalln(err)
+			log.Println("Error reading register", err)
+			continue
 		}
 		// convert to float32
 		outbits := uint32(out[0])<<16 | uint32(out[1])
@@ -50,9 +52,18 @@ func main() {
 		}
 
 		// calculate the adjustment
-		//adjustment := deviation * adjustment_step_size
+		adjustment := deviation / adjustment_step_size
 
-		// TODO: write the adjustment to the powerplant
+		// set adjustment to two uint16s in an array
+		adjustmentbits := math.Float32bits(adjustment)
+		adjustmentarray := []uint16{uint16(adjustmentbits >> 16),
+			uint16(adjustmentbits)}
 
+		// write the adjustment to the powerplant register
+		err = client.WriteRegisters(uint16(67), adjustmentarray)
+		if err != nil {
+			log.Println("Error writing register", err)
+			continue
+		}
 	}
 }

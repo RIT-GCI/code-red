@@ -10,12 +10,6 @@ import (
 
 // Example handler object, passed to the NewServer() constructor above.
 type modbusHandler struct {
-	// these are here to hold client-provided (written) values, for both coils and
-	// holding registers
-	coils [100]bool
-
-	// holding registers are 16-bit values, so we use uint16
-	holdingRegisters [100]uint16
 }
 
 type powerplant struct {
@@ -88,11 +82,14 @@ func (h *modbusHandler) HandleHoldingRegisters(req *modbus.HoldingRegistersReque
 	switch req.Addr {
 	case 65:
 		return plant.queryOutputModbus(req.Quantity)
+	case 67:
+		return plant.setReactivity(req)
 	default:
 		return nil, modbus.ErrIllegalFunction
 	}
 }
 
+// Not implemented
 func (h *modbusHandler) HandleCoils(req *modbus.CoilsRequest) ([]bool, error) {
 	return nil, nil
 }
@@ -111,13 +108,33 @@ func (p *powerplant) queryOutputModbus(quantity uint16) (res []uint16, err error
 	return
 }
 
+func (p *powerplant) setReactivity(req *modbus.HoldingRegistersRequest) ([]uint16, error) {
+	if req.Quantity != 2 {
+		return nil, modbus.ErrIllegalDataValue
+	}
+
+	if !req.IsWrite {
+		return nil, modbus.ErrIllegalFunction
+	}
+
+	// Convert two uint16s to float32
+	p.reactivity = math.Float32frombits(uint32(req.Args[0])<<16 |
+		uint32(req.Args[1]))
+
+	log.Println("reactivity set to:", p.reactivity)
+
+	return req.Args, nil
+}
+
 // updateOutput updates the powerplant output based on the target and reactivity.
 // The reactivity is added to the sine of the current time (minutes in the hour,
 // scaled to 0-1) to get the new output.
 func (p *powerplant) updateOutput() {
 	for {
-		p.output = p.output + p.reactivity + float32(.01*
-			math.Sin(float64(time.Now().Minute())/60.0*2*math.Pi))
+		p.output = p.output + p.reactivity + float32(.05*
+			math.Sin((float64(
+				time.Now().Minute())+(float64(time.Now().Second())/
+				60.0))/60.0*2*math.Pi))
 		log.Println("current output:", p.output)
 		time.Sleep(1 * time.Second)
 	}
