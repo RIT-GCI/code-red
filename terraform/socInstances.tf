@@ -73,6 +73,10 @@ resource "openstack_compute_instance_v2" "graylog" {
   network {
     port = openstack_networking_port_v2.graylog_port1.id
   }
+
+  lifecycle {
+    replace_triggered_by = [terraform_data.graylog_data]
+  }
 }
 
 resource "openstack_networking_port_v2" "graylog_port1" {
