@@ -21,6 +21,10 @@ jobs:
       with:
         go-version: '1.21'
 
+
+    - name: Run tests on powerplant
+      run: go test ./powerplant
+
     - name: Build Controller
       run: go build -v -o control ./controller/
       
