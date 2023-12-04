@@ -22,7 +22,7 @@ jobs:
         go-version: '1.21'
 
     - name: Build Controller
-      run: go build -v ./controller/controller.go
+      run: go build -v ./controller/ -o control
       
     - name: Build powerplant
-      run: go build -v ./main/main.go
+      run: go build -v ./main/ -o plant
