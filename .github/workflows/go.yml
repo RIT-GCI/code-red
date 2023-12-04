@@ -25,4 +25,4 @@ jobs:
       run: go build -v -o control ./controller/
       
     - name: Build powerplant
-      run: go build -v -o plant ./main/
+      run: go build -v -o plant ./powerplant/
