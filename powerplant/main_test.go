@@ -19,7 +19,7 @@ func Test_modbusHandler_HandleDiscreteInputs(t *testing.T) {
 		wantRes []bool
 		wantErr bool
 	}{
-		// TODO: Add test cases.
+		// Not implemented
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -46,7 +46,7 @@ func Test_modbusHandler_HandleInputRegisters(t *testing.T) {
 		want    []uint16
 		wantErr bool
 	}{
-		// TODO: Add test cases.
+		// Not implemented
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

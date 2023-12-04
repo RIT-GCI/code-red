@@ -74,7 +74,7 @@ func (h *modbusHandler) HandleInputRegisters(req *modbus.InputRegistersRequest) 
 	return nil, nil
 }
 
-// Not implemented
+// Holding registers are used for both input and output of data.
 func (h *modbusHandler) HandleHoldingRegisters(req *modbus.HoldingRegistersRequest) (
 	res []uint16, err error) {
 	log.Printf("coils request: %#v", *req)
@@ -101,9 +101,10 @@ func (p *powerplant) queryOutputModbus(quantity uint16) (res []uint16, err error
 		return nil, modbus.ErrIllegalDataValue
 	}
 
+	// todo: impelement check that handles if quantity is 1 or 0
 	res = []uint16{uint16(math.Float32bits(p.output) >> 16),
 		uint16(math.Float32bits(p.output))}
-	// convert to two uint16s insde of res
+	// convert to two uint16s inside of res
 
 	return
 }
