@@ -77,7 +77,7 @@ func (h *modbusHandler) HandleInputRegisters(req *modbus.InputRegistersRequest) 
 // Holding registers are used for both input and output of data.
 func (h *modbusHandler) HandleHoldingRegisters(req *modbus.HoldingRegistersRequest) (
 	res []uint16, err error) {
-	log.Printf("coils request: %#v", *req)
+	log.Printf("Holding Registers request: %#v", *req)
 	// This switch calls go functions for any modbus function desired.
 	switch req.Addr {
 	case 65:

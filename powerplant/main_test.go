@@ -67,6 +67,11 @@ func Test_modbusHandler_HandleHoldingRegisters(t *testing.T) {
 	type args struct {
 		req *modbus.HoldingRegistersRequest
 	}
+
+	plant = &powerplant{
+		output: 100,
+	}
+
 	tests := []struct {
 		name    string
 		h       *modbusHandler
@@ -74,7 +79,36 @@ func Test_modbusHandler_HandleHoldingRegisters(t *testing.T) {
 		wantRes []uint16
 		wantErr bool
 	}{
-		// TODO: Add test cases.
+		{
+			name: "query plant output",
+			h:    &modbusHandler{},
+			args: args{
+				req: &modbus.HoldingRegistersRequest{
+					Quantity: 2,
+					Addr:     65,
+				},
+			},
+			wantRes: convert_float32_to_uint16(plant.output),
+		},
+		{
+			name:    "set plant reactivity",
+			h:       &modbusHandler{},
+			wantRes: convert_float32_to_uint16(.5),
+			args: args{
+				req: &modbus.HoldingRegistersRequest{
+					Addr:     67,
+					Args:     convert_float32_to_uint16(.5),
+					Quantity: 2,
+					IsWrite:  true,
+				},
+			},
+		},
+		{
+			name:    "invalid addr",
+			h:       &modbusHandler{},
+			wantErr: true,
+			args:    args{req: &modbus.HoldingRegistersRequest{}},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
