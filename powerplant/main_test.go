@@ -4,6 +4,7 @@ import (
 	"math"
 	"reflect"
 	"testing"
+	"time"
 
 	"github.com/simonvetter/modbus"
 )
@@ -19,7 +20,7 @@ func Test_modbusHandler_HandleDiscreteInputs(t *testing.T) {
 		wantRes []bool
 		wantErr bool
 	}{
-		// Not implemented
+		{wantRes: nil},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -46,7 +47,7 @@ func Test_modbusHandler_HandleInputRegisters(t *testing.T) {
 		want    []uint16
 		wantErr bool
 	}{
-		// Not implemented
+		{want: nil},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -100,7 +101,7 @@ func Test_modbusHandler_HandleCoils(t *testing.T) {
 		want    []bool
 		wantErr bool
 	}{
-		// Not implemented, no test cases
+		{want: nil},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -256,16 +257,63 @@ func Test_powerplant_setReactivity(t *testing.T) {
 	}
 }
 
-func Test_powerplant_updateOutput(t *testing.T) {
+func Test_powerplant_generateOutput(t *testing.T) {
+	type fields struct {
+		output     float32
+		reactivity float32
+	}
+	type args struct {
+		t time.Time
+	}
+
 	tests := []struct {
-		name string
-		p    *powerplant
+		name   string
+		fields fields
+		args   args
+		want   float32
 	}{
-		// TODO: Add test cases.
+		{
+			name: "generateOutput 001500",
+			args: args{
+				t: time.Unix(1191456900, 0),
+			},
+			want:   100 + 0.2,
+			fields: fields{100, 0},
+		},
+		{
+			name: "generateOutput 001550",
+			args: args{
+				t: time.Unix(1191456950, 0),
+			},
+			want:   100 + 0.19923894,
+			fields: fields{100, 0},
+		},
+		{
+			name: "generateOutput unix 0",
+			args: args{
+				t: time.Unix(0, 0),
+			},
+			want:   100 + 0,
+			fields: fields{100, 0},
+		},
+		{
+			name: "generateOutput unix 0 + reactivity",
+			args: args{
+				t: time.Unix(0, 0),
+			},
+			want:   100 + 1,
+			fields: fields{100, 1},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			tt.p.updateOutput()
+			p := &powerplant{
+				reactivity: tt.fields.reactivity,
+				output:     tt.fields.output,
+			}
+			if got := p.generateOutput(tt.args.t); got != tt.want {
+				t.Errorf("powerplant.generateOutput() = %v, want %v", got, tt.want)
+			}
 		})
 	}
 }
