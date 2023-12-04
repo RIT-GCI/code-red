@@ -120,6 +120,10 @@ func Test_powerplant_queryOutputModbus(t *testing.T) {
 	type args struct {
 		quantity uint16
 	}
+
+	baseplant := &powerplant{
+		output: 100,
+	}
 	tests := []struct {
 		name    string
 		p       *powerplant
@@ -127,7 +131,22 @@ func Test_powerplant_queryOutputModbus(t *testing.T) {
 		wantRes []uint16
 		wantErr bool
 	}{
-		// TODO: Add test cases.
+		{
+			name: "queryOutputModbus normal",
+			p:    baseplant,
+			args: args{
+				quantity: 2,
+			},
+			wantRes: convert_float32_to_uint16(baseplant.output),
+		},
+		{
+			name: "queryOutputModbus too many",
+			p:    baseplant,
+			args: args{
+				quantity: 3,
+			},
+			wantErr: true,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -152,6 +171,10 @@ func Test_powerplant_setReactivity(t *testing.T) {
 	type args struct {
 		req *modbus.HoldingRegistersRequest
 	}
+	baseplant := &powerplant{
+		output: 100,
+	}
+
 	tests := []struct {
 		name    string
 		p       *powerplant
@@ -161,9 +184,7 @@ func Test_powerplant_setReactivity(t *testing.T) {
 	}{
 		{
 			name: "setReactivity positive",
-			p: &powerplant{
-				output: 100,
-			},
+			p:    baseplant,
 			want: convert_float32_to_uint16(.5),
 			args: args{
 				req: &modbus.HoldingRegistersRequest{
@@ -175,9 +196,7 @@ func Test_powerplant_setReactivity(t *testing.T) {
 		},
 		{
 			name: "setReactivity negative",
-			p: &powerplant{
-				output: 100,
-			},
+			p:    baseplant,
 			want: convert_float32_to_uint16(-.5),
 			args: args{
 				req: &modbus.HoldingRegistersRequest{
@@ -189,9 +208,7 @@ func Test_powerplant_setReactivity(t *testing.T) {
 		},
 		{
 			name: "setReactivity no write",
-			p: &powerplant{
-				output: 100,
-			},
+			p:    baseplant,
 			args: args{
 				req: &modbus.HoldingRegistersRequest{
 					Quantity: 2,
@@ -202,9 +219,7 @@ func Test_powerplant_setReactivity(t *testing.T) {
 		},
 		{
 			name: "setReactivity qty too high",
-			p: &powerplant{
-				output: 100,
-			},
+			p:    baseplant,
 			args: args{
 				req: &modbus.HoldingRegistersRequest{
 					Quantity: 5,
@@ -214,10 +229,8 @@ func Test_powerplant_setReactivity(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name: "setReactivity positive buffer overflow",
-			p: &powerplant{
-				output: 100,
-			},
+			name:    "setReactivity positive buffer overflow",
+			p:       baseplant,
 			wantErr: true,
 			args: args{
 				req: &modbus.HoldingRegistersRequest{
