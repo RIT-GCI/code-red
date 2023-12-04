@@ -45,7 +45,7 @@ func main() {
 	// create the server object
 	server, err = modbus.NewServer(&modbus.ServerConfiguration{
 		// listen on localhost port 5502
-		URL: "tcp://localhost:5502",
+		URL: "tcp://0.0.0.0:5502",
 		// close idle connections after 30s of inactivity
 		Timeout: 30 * time.Second,
 		// accept 5 concurrent connections max.

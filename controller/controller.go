@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"log"
 	"math"
 	"time"
@@ -17,9 +18,11 @@ const (
 )
 
 func main() {
+	remoteAddr := flag.String("addr", "tcp://0.0.0.0:5502", "listen address in format tcp://host:port")
+
 	// init modbus client
 	client, err := modbus.NewClient(&modbus.ClientConfiguration{
-		URL: "tcp://localhost:5502",
+		URL: *remoteAddr,
 	})
 	if err != nil {
 		log.Fatalln(err)
