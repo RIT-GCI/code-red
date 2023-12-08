@@ -106,7 +106,7 @@
         user: root
         key: "{{ lookup('file', '~/.ssh/id_graylog.pub') }}"
         state: present
-  
+
     - name: "Add syslog iptables rules"
       ansible.builtin.iptables:
         table: nat
@@ -130,12 +130,12 @@
       #admin:6a9019b9e69ce9614774bf649e6fa3c8fe9880f0b3b944e68dc1e8f797e75c21
       #this isn't particularly secure, this is probably a job for vault.
       ansible.builtin.shell: >-
-        curl 'http://10.10.40.201:9000/api/system/inputs' 
-        -X POST 
-        -H 'Content-Type: application/json' 
-        -H 'X-Requested-By: Graylog API Browser' 
-        -H 'Authorization: Basic YWRtaW46NmE5MDE5YjllNjljZTk2MTQ3NzRiZjY0OWU2ZmEzYzhmZTk4ODBmMGIzYjk0NGU2OGRjMWU4Zjc5N2U3NWMyMQ==' 
-        --data-raw 
+        curl 'http://10.10.40.201:9000/api/system/inputs'
+        -X POST
+        -H 'Content-Type: application/json'
+        -H 'X-Requested-By: Graylog API Browser'
+        -H 'Authorization: Basic YWRtaW46NmE5MDE5YjllNjljZTk2MTQ3NzRiZjY0OWU2ZmEzYzhmZTk4ODBmMGIzYjk0NGU2OGRjMWU4Zjc5N2U3NWMyMQ=='
+        --data-raw
         '{
           "title": "udprsyslog",
           "global": true,
@@ -152,5 +152,35 @@
             "allow_override_date": true,
             "bind_address": "0.0.0.0",
             "store_full_message": true
+          }
+        }'
+
+    - name: run curl command to add beat listener
+      ansible.builtin.shell: >-
+        curl 'http://10.10.40.201:9000/api/system/inputs'
+        -X POST
+        -H 'Content-Type: application/json'
+        -H 'X-Requested-By: Graylog API Browser'
+        -H 'Authorization: Basic YWRtaW46NmE5MDE5YjllNjljZTk2MTQ3NzRiZjY0OWU2ZmEzYzhmZTk4ODBmMGIzYjk0NGU2OGRjMWU4Zjc5N2U3NWMyMQ=='
+        --data-raw
+        '{
+          "title": "beat_listener",
+          "global": true,
+          "type": "org.graylog.plugins.beats.Beats2Input",
+          "configuration": {
+            "bind_address": "0.0.0.0",
+            "port": 5044,
+            "recv_buffer_size": 1048576,
+            "number_worker_threads": 64,
+            "tls_cert_file":"",
+            "tls_key_file":"",
+            "tls_enable":false,
+            "tls_key_password":"",
+            "tls_client_auth":"disabled",
+            "tls_client_auth_cert_file":"",
+            "tcp_keepalive":false,
+            "override_source": null,
+            "charset_name": "UTF-8",
+            "no_beats_prefix": false
           }
         }'
