@@ -13,7 +13,7 @@
 
 - name: Copy files
   copy:
-    src: winlogbeat.yml
+    src: winlogbeat.config
     dest: C:\winlogbeat\winlogbeat.yml
 
 - name: Configure Winlogbeat
