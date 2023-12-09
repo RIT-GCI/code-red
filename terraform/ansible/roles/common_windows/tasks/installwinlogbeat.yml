@@ -13,10 +13,8 @@
 
 - name: Copy files
   copy:
-    src: "{{ item.src }}"
-    dest: "{{ item.dest }}"
-  with_items:
-    - { src: "winlogbeat.yml", dest: 'C:\winlogbeat\winlogbeat.yml' }
+    src: winlogbeat.yml
+    dest: C:\winlogbeat\winlogbeat.yml
 
 - name: Configure Winlogbeat
   win_shell: PowerShell.exe -ExecutionPolicy UnRestricted -File C:\winlogbeat\install-service-winlogbeat.ps1
