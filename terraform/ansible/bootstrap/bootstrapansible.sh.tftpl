@@ -97,10 +97,6 @@ ${role.content}
 EOF
 %{ endfor }
 
-cat <<EOF> /root/.ansible/roles/common_windows/files/winlogbeat.yml
-${winlogbeat_config}
-EOF
-
 mkdir -p /root/ansible/dns
 # Create the dns_entries.csv file
 cat <<EOF > /root/ansible/dns/dns_entries.csv

@@ -34,7 +34,6 @@ resource "openstack_compute_instance_v2" "ansible" {
     hostsYAML = file("ansible/inventory/hosts.yaml")
     ansibleCFG = file("ansible/ansible.cfg")
     dns_entries = file("ansible/dns/dns_entries.csv")
-    winlogbeat_config = file("ansible/roles/common_windows/files/winlogbeat.config")
     ips = {
       "graylog" = openstack_networking_port_v2.graylog_port1.fixed_ip[0].ip_address,
     }
