@@ -11,18 +11,18 @@
     dest: C:\winlogbeat
     delete_archive: yes
 
-- name: Copy files
+- name: Copy Winlogbeat Configuration
   copy:
     src: winlogbeat.config
     dest: C:/winlogbeat/winlogbeat-7.17.15-windows-x86_64/winlogbeat.yml
 
-- name: Configure Winlogbeat
+- name: Install Winlogbeat Service
   win_shell: PowerShell.exe -ExecutionPolicy UnRestricted -File C:/winlogbeat/winlogbeat-7.17.15-windows-x86_64/install-service-winlogbeat.ps1
 
   args:
     executable: powershell.exe
 
-- name: Start Winlogbeat service
+- name: Start Winlogbeat Service
   win_shell: "Start-Service winlogbeat"
 
   args:
