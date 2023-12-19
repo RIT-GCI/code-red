@@ -170,7 +170,6 @@
           "configuration": {
             "bind_address": "0.0.0.0",
             "port": 5044,
-            "recv_buffer_size": 1048576,
             "number_worker_threads": 64,
             "tls_cert_file":"",
             "tls_key_file":"",
@@ -184,3 +183,13 @@
             "no_beats_prefix": false
           }
         }'
+
+    - name: Restart graylog after adding inputs
+      ansible.builtin.service:
+        name: "graylog-server"
+        state: restarted
+
+    - name: Restart rsyslog
+      ansible.builtin.service:
+        name: "rsyslog"
+        state: restarted
