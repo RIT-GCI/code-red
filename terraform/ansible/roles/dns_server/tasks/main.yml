@@ -1,0 +1,36 @@
+## Wait for the machines to be bootstrapped
+
+- name: Wait for windows to be bootstrapped for 300 seconds max
+  ansible.builtin.wait_for_connection:
+    timeout: 300
+
+- name: Get Host facts
+  gather_facts:
+    register: facts
+    until: facts is defined
+    retries: 60
+    delay: 10
+
+# Read the CSV file
+- name: Read DNS records from the CSV file
+  community.general.read_csv:
+    path: /root/ansible/dns/dns_entries.csv
+    fieldnames: Name,Type,Zone,Value
+    delimiter: ","
+  register: dns_entries
+  delegate_to: localhost
+
+# Add records read from the csv file
+- name: Add DNS Records
+  community.windows.win_dns_record:
+    name: "{{ item.Name }}"
+    zone: "{{ item.Zone }}"
+    type: "{{ item.Type }}"
+    value: "{{ item.Value }}"
+  loop: "{{ dns_entries.list }}"
+
+- name: Restart DNS service
+  ansible.windows.win_service:
+    name: DNS
+    state: restarted
+  changed_when: true
