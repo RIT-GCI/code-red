@@ -25,10 +25,7 @@ domain_members:
     elan-winhost-01:
       ansible_host: 10.10.20.32
 
-    elan-winsrv-01:
-      ansible_host: 10.10.20.16
-
-dns_server:
+domain_servers:
   hosts:
     elan-winsrv-01:
-      ansible_host: 10.10.20.32
+      ansible_host: 10.10.20.16

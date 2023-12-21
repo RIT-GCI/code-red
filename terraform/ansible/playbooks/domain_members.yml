@@ -1,5 +1,11 @@
+- hosts: domain_servers
+  gather_facts: False
+  roles:
+    - common_domain_server
+
 ## add hosts to the domain
 - hosts: domain_members
   gather_facts: False
   roles:
     - domain_member
+

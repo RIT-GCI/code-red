@@ -7,4 +7,4 @@ dns_domain_name: codered.local
 domain_admin_password: someVerySafeAndS3Cure!Passw0rd
 domain_admin_user: Administrator@codered.local
 safe_mode_password: nowTH!S!SAF3,right?
-state: domain_member
+state: member_server

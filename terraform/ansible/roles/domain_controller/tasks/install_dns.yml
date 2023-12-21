@@ -1,0 +1,54 @@
+- name: features | Installing Windows DNS Server
+  win_feature:
+    name: DNS
+    state: present
+    include_management_tools: yes
+    include_sub_features: yes
+  register: _windows_dns_server
+
+- name: Ensure primary zone is present
+  community.windows.win_dns_zone:
+    name: "{{ dns_domain_name }}"
+    replication: domain
+    type: primary
+    state: present
+
+- name: Create ansible server record
+  community.windows.win_dns_record:
+    name: "ansible"
+    type: "A"
+    value: "10.10.40.250"
+    zone: "codered.local"
+
+- name: Create dc01 server record
+  community.windows.win_dns_record:
+    name: "dc01"
+    type: "A"
+    value: "10.10.40.254"
+    zone: "codered.local"
+
+- name: Create graylog server record
+  community.windows.win_dns_record:
+    name: "graylog"
+    type: "A"
+    value: "10.10.40.201"
+    zone: "codered.local"
+
+- name: Create elan-winhost-01 server record
+  community.windows.win_dns_record:
+    name: "elan-winhost-01"
+    type: "A"
+    value: "10.10.20.32"
+    zone: "codered.local"
+
+- name: Create elan-winsrv-01 server record
+  community.windows.win_dns_record:
+    name: "elan-winsrv-01"
+    type: "A"
+    value: "10.10.20.16"
+    zone: "codered.local"
+
+- name: reboot | Rebooting Server
+  win_reboot:
+    reboot_timeout_sec: 300
+    shutdown_timeout: 300

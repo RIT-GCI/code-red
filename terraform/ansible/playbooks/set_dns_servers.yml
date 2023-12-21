@@ -1,0 +1,23 @@
+---
+- name: Set DNS Servers using NetworkManager on Debian-based Systems
+  hosts: linux localhost
+  become: sudo
+  tasks:
+    - name: install nmcli
+      apt:
+        name: network-manager
+        state: present
+        update_cache: true
+
+    - name: Get list of all connections
+      ansible.builtin.shell:
+        cmd: nmcli -t -f NAME connection show
+      register: connections
+      changed_when: false
+
+    - name: Set DNS servers for each connection
+      ansible.builtin.nmcli:
+        conn_name: "{{ item }}"
+        ipv4.dns: "10.10.20.254,1.1.1.1"
+      with_items: "{{ connections.stdout_lines }}"
+      when: "ansible_distribution | lower in ['debian', 'ubuntu']"
