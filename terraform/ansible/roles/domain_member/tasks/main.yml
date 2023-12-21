@@ -13,6 +13,14 @@
 
 ## Common Domain Membership Tasks
 
+## Set the DNS server to DomainController
+- name: Set DC as DNS
+  win_dns_client:
+    adapter_names: "*"
+    dns_servers:
+      - "{{ hostvars['dc01'].ansible_host }}"
+    log_path: C:\dns_logs.txt
+
 - name: Join Windows computer to a domain
   microsoft.ad.membership:
     hostname: "{{ inventory_hostname_short }}"
@@ -26,11 +34,3 @@
 - name: Reboot if required
   win_reboot:
   when: domain_state.reboot_required
-
-## Set the DNS server to DomainController
-- name: Set DC as DNS
-  win_dns_client:
-    adapter_names: "*"
-    dns_servers:
-      - "{{ hostvars['dc01'].ansible_host }}"
-    log_path: C:\dns_logs.txt

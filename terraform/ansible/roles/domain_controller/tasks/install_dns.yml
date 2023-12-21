@@ -47,8 +47,3 @@
     type: "A"
     value: "10.10.20.16"
     zone: "codered.local"
-
-- name: reboot | Rebooting Server
-  win_reboot:
-    reboot_timeout_sec: 300
-    shutdown_timeout: 300
