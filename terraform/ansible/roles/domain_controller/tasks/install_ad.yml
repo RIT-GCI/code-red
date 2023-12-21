@@ -55,5 +55,6 @@
 
 - name: reboot | Rebooting Server
   win_reboot:
+    post_reboot_delay: 120
     reboot_timeout_sec: 300
     shutdown_timeout: 300
