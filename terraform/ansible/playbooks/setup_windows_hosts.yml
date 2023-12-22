@@ -3,17 +3,19 @@
   gather_facts: False
   roles:
     - domain_controller
+
+- hosts: windows
+  gather_facts: False
+  roles:
     - common_windows
 
 - hosts: domain_servers
   gather_facts: False
   roles:
     - common_domain_server
-    - common_windows
 
 ## Add windows hosts to the domain
 - hosts: domain_members
   gather_facts: False
   roles:
     - domain_member
-    - common_windows

@@ -1,5 +1,3 @@
 - include: installSysmon.yml
-  when: ansible_distribution is search ("Microsoft")
 
 - include: installwinlogbeat.yml
-  when: ansible_distribution is search ("Microsoft")

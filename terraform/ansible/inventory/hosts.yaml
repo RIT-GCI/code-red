@@ -2,7 +2,11 @@ linux:
   hosts: graylog
 
 windows:
-  hosts: dc01 elan-winhost-01 elan-winsrv-01
+  hosts:
+    dc01:
+    elan-winhost-01:
+    elan-winsrv-01:
+
   vars:
     ansible_user: "{{ windows.ansible_user }}"
     ansible_password: "{{ windows.ansible_password }}"
