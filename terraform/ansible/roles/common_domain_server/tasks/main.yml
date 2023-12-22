@@ -1,0 +1,22 @@
+## Wait for the machines to be bootstrapped
+
+- name: Wait for windows to be bootstrapped for 300 seconds max
+  ansible.builtin.wait_for_connection:
+    timeout: 300
+
+- name: Get Host facts
+  gather_facts:
+    register: facts
+    until: facts is defined
+    retries: 60
+    delay: 0
+
+- name: Managing DNS Server Domain Membership
+  microsoft.ad.domain_controller:
+    dns_domain_name: "{{ dns_domain_name }}"
+    domain_admin_user: "{{ domain_admin_user }}"
+    domain_admin_password: "{{ domain_admin_password }}"
+    local_admin_password: "{{ safe_mode_password }}"
+    state: "{{ state }}"
+    reboot: true
+  register: _windows_dns_server

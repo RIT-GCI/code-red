@@ -1,0 +1,3 @@
+- include: installSysmon.yml
+
+- include: installwinlogbeat.yml

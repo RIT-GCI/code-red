@@ -1,0 +1,37 @@
+## Wait for the machines to be bootstrapped
+
+- name: Wait for windows to be bootstrapped for 300 seconds max
+  ansible.builtin.wait_for_connection:
+    delay: 60
+    timeout: 300
+
+- name: Get Host facts
+  gather_facts:
+    register: facts
+    until: facts is defined
+    retries: 60
+    delay: 10
+
+## Common Domain Membership Tasks
+
+## Set the DNS server to DomainController
+- name: Set DC as DNS
+  win_dns_client:
+    adapter_names: "*"
+    dns_servers:
+      - "{{ hostvars['dc01'].ansible_host }}"
+    log_path: C:\dns_logs.txt
+
+- name: Join Windows computer to a domain
+  microsoft.ad.membership:
+    hostname: "{{ inventory_hostname_short }}"
+    dns_domain_name: "{{ dns_domain_name }}"
+    domain_admin_user: "{{ domain_admin_user }}"
+    domain_admin_password: "{{ domain_admin_password }}"
+    # domain_ou_path: "OU=Windows,OU=Machines,DC=codered,DC=local"
+    state: domain
+  register: domain_state
+
+- name: Reboot if required
+  win_reboot:
+  when: domain_state.reboot_required

@@ -2,7 +2,16 @@ linux:
   hosts: graylog
 
 windows:
-  hosts: domain_controller
+  hosts:
+    dc01:
+    elan-winhost-01:
+    elan-winsrv-01:
+
+  vars:
+    ansible_user: "{{ windows.ansible_user }}"
+    ansible_password: "{{ windows.ansible_password }}"
+    ansible_connection: winrm
+    ansible_winrm_server_cert_validation: ignore
 
 domain_controllers:
   hosts:
@@ -14,3 +23,13 @@ domain_controllers:
     ansible_password: "{{ windows.ansible_password }}"
     ansible_connection: winrm
     ansible_winrm_server_cert_validation: ignore
+
+domain_members:
+  hosts:
+    elan-winhost-01:
+      ansible_host: 10.10.20.32
+
+domain_servers:
+  hosts:
+    elan-winsrv-01:
+      ansible_host: 10.10.20.16

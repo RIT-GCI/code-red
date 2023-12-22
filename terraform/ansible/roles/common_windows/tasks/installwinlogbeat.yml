@@ -1,0 +1,29 @@
+## Downloads and installs Winlogbeat
+
+- name: Download Sysmon Zip from URL
+  ansible.windows.win_get_url:
+    url: https://artifacts.elastic.co/downloads/beats/winlogbeat/winlogbeat-7.17.15-windows-x86_64.zip
+    dest: C:\\winlogbeat.zip
+
+- name: Unzip the Winlogbeat Zip File
+  community.windows.win_unzip:
+    src: C:\winlogbeat.zip
+    dest: C:\winlogbeat
+    delete_archive: yes
+
+- name: Copy Winlogbeat Configuration
+  copy:
+    src: winlogbeat.config
+    dest: C:/winlogbeat/winlogbeat-7.17.15-windows-x86_64/winlogbeat.yml
+
+- name: Install Winlogbeat Service
+  win_shell: PowerShell.exe -ExecutionPolicy UnRestricted -File C:/winlogbeat/winlogbeat-7.17.15-windows-x86_64/install-service-winlogbeat.ps1
+
+  args:
+    executable: powershell.exe
+
+- name: Start Winlogbeat Service
+  win_shell: "Start-Service winlogbeat"
+
+  args:
+    executable: powershell.exe

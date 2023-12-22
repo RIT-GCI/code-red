@@ -1,0 +1,10 @@
+# Domain Member
+ansible_user: ansible
+ansible_password: ansible
+ansible_connection: winrm
+ansible_winrm_server_cert_validation: ignore
+dns_domain_name: codered.local
+domain_admin_password: someVerySafeAndS3Cure!Passw0rd
+domain_admin_user: Administrator@codered.local
+safe_mode_password: nowTH!S!SAF3,right?
+state: domain_member

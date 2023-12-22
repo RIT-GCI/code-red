@@ -10,6 +10,9 @@
 - name: "Create users"
   ansible.builtin.import_playbook: generateusers.yml
 
+- name: "Set timezones"
+  ansible.builtin.import_playbook: settimezones.yml
+
 - name: "Generate ssh keys"
   ansible.builtin.import_playbook: generatesshkeys.yml
 

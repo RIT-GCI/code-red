@@ -1,0 +1,9 @@
+- name: Set timezones on all nodes
+  hosts: linux localhost
+  become: true
+
+  tasks:
+  - name: set timezone to America/New_York
+    community.general.timezone:
+      hwclock: UTC
+      name: America/New_York
