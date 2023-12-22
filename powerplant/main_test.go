@@ -1,0 +1,353 @@
+package main
+
+import (
+	"math"
+	"reflect"
+	"testing"
+	"time"
+
+	"github.com/simonvetter/modbus"
+)
+
+func Test_modbusHandler_HandleDiscreteInputs(t *testing.T) {
+	type args struct {
+		req *modbus.DiscreteInputsRequest
+	}
+	tests := []struct {
+		name    string
+		h       *modbusHandler
+		args    args
+		wantRes []bool
+		wantErr bool
+	}{
+		{wantRes: nil},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			gotRes, err := tt.h.HandleDiscreteInputs(tt.args.req)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("modbusHandler.HandleDiscreteInputs() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !reflect.DeepEqual(gotRes, tt.wantRes) {
+				t.Errorf("modbusHandler.HandleDiscreteInputs() = %v, want %v", gotRes, tt.wantRes)
+			}
+		})
+	}
+}
+
+func Test_modbusHandler_HandleInputRegisters(t *testing.T) {
+	type args struct {
+		req *modbus.InputRegistersRequest
+	}
+	tests := []struct {
+		name    string
+		h       *modbusHandler
+		args    args
+		want    []uint16
+		wantErr bool
+	}{
+		{want: nil},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := tt.h.HandleInputRegisters(tt.args.req)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("modbusHandler.HandleInputRegisters() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("modbusHandler.HandleInputRegisters() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func Test_modbusHandler_HandleHoldingRegisters(t *testing.T) {
+	type args struct {
+		req *modbus.HoldingRegistersRequest
+	}
+
+	plant = &powerplant{
+		output: 100,
+	}
+
+	tests := []struct {
+		name    string
+		h       *modbusHandler
+		args    args
+		wantRes []uint16
+		wantErr bool
+	}{
+		{
+			name: "query plant output",
+			h:    &modbusHandler{},
+			args: args{
+				req: &modbus.HoldingRegistersRequest{
+					Quantity: 2,
+					Addr:     65,
+				},
+			},
+			wantRes: convert_float32_to_uint16(plant.output),
+		},
+		{
+			name:    "set plant reactivity",
+			h:       &modbusHandler{},
+			wantRes: convert_float32_to_uint16(.5),
+			args: args{
+				req: &modbus.HoldingRegistersRequest{
+					Addr:     67,
+					Args:     convert_float32_to_uint16(.5),
+					Quantity: 2,
+					IsWrite:  true,
+				},
+			},
+		},
+		{
+			name:    "invalid addr",
+			h:       &modbusHandler{},
+			wantErr: true,
+			args:    args{req: &modbus.HoldingRegistersRequest{}},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			gotRes, err := tt.h.HandleHoldingRegisters(tt.args.req)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("modbusHandler.HandleHoldingRegisters() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !reflect.DeepEqual(gotRes, tt.wantRes) {
+				t.Errorf("modbusHandler.HandleHoldingRegisters() = %v, want %v", gotRes, tt.wantRes)
+			}
+		})
+	}
+}
+
+func Test_modbusHandler_HandleCoils(t *testing.T) {
+	type args struct {
+		req *modbus.CoilsRequest
+	}
+	tests := []struct {
+		name    string
+		h       *modbusHandler
+		args    args
+		want    []bool
+		wantErr bool
+	}{
+		{want: nil},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := tt.h.HandleCoils(tt.args.req)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("modbusHandler.HandleCoils() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("modbusHandler.HandleCoils() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func Test_powerplant_queryOutputModbus(t *testing.T) {
+	type args struct {
+		quantity uint16
+	}
+
+	baseplant := &powerplant{
+		output: 100,
+	}
+	tests := []struct {
+		name    string
+		p       *powerplant
+		args    args
+		wantRes []uint16
+		wantErr bool
+	}{
+		{
+			name: "queryOutputModbus normal",
+			p:    baseplant,
+			args: args{
+				quantity: 2,
+			},
+			wantRes: convert_float32_to_uint16(baseplant.output),
+		},
+		{
+			name: "queryOutputModbus too many",
+			p:    baseplant,
+			args: args{
+				quantity: 3,
+			},
+			wantErr: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			gotRes, err := tt.p.queryOutputModbus(tt.args.quantity)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("powerplant.queryOutputModbus() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !reflect.DeepEqual(gotRes, tt.wantRes) {
+				t.Errorf("powerplant.queryOutputModbus() = %v, want %v", gotRes, tt.wantRes)
+			}
+		})
+	}
+}
+
+func convert_float32_to_uint16(f float32) []uint16 {
+	return []uint16{uint16(math.Float32bits(f) >> 16),
+		uint16(math.Float32bits(f))}
+}
+
+func Test_powerplant_setReactivity(t *testing.T) {
+	type args struct {
+		req *modbus.HoldingRegistersRequest
+	}
+	baseplant := &powerplant{
+		output: 100,
+	}
+
+	tests := []struct {
+		name    string
+		p       *powerplant
+		args    args
+		want    []uint16
+		wantErr bool
+	}{
+		{
+			name: "setReactivity positive",
+			p:    baseplant,
+			want: convert_float32_to_uint16(.5),
+			args: args{
+				req: &modbus.HoldingRegistersRequest{
+					Args:     convert_float32_to_uint16(.5),
+					Quantity: 2,
+					IsWrite:  true,
+				},
+			},
+		},
+		{
+			name: "setReactivity negative",
+			p:    baseplant,
+			want: convert_float32_to_uint16(-.5),
+			args: args{
+				req: &modbus.HoldingRegistersRequest{
+					Args:     convert_float32_to_uint16(-.5),
+					Quantity: 2,
+					IsWrite:  true,
+				},
+			},
+		},
+		{
+			name: "setReactivity no write",
+			p:    baseplant,
+			args: args{
+				req: &modbus.HoldingRegistersRequest{
+					Quantity: 2,
+					IsWrite:  false,
+				},
+			},
+			wantErr: true,
+		},
+		{
+			name: "setReactivity qty too high",
+			p:    baseplant,
+			args: args{
+				req: &modbus.HoldingRegistersRequest{
+					Quantity: 5,
+					IsWrite:  true,
+				},
+			},
+			wantErr: true,
+		},
+		{
+			name:    "setReactivity positive buffer overflow",
+			p:       baseplant,
+			wantErr: true,
+			args: args{
+				req: &modbus.HoldingRegistersRequest{
+					Args:     convert_float32_to_uint16(.5),
+					Quantity: 1,
+					IsWrite:  true,
+				},
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+
+			got, err := tt.p.setReactivity(tt.args.req)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("powerplant.setReactivity() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("powerplant.setReactivity() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func Test_powerplant_generateOutput(t *testing.T) {
+	type fields struct {
+		output     float32
+		reactivity float32
+	}
+	type args struct {
+		t time.Time
+	}
+
+	tests := []struct {
+		name   string
+		fields fields
+		args   args
+		want   float32
+	}{
+		{
+			name: "generateOutput 001500",
+			args: args{
+				t: time.Unix(1191456900, 0),
+			},
+			want:   100 + 0.2,
+			fields: fields{100, 0},
+		},
+		{
+			name: "generateOutput 001550",
+			args: args{
+				t: time.Unix(1191456950, 0),
+			},
+			want:   100 + 0.19923894,
+			fields: fields{100, 0},
+		},
+		{
+			name: "generateOutput unix 0",
+			args: args{
+				t: time.Unix(0, 0),
+			},
+			want:   100 + 0,
+			fields: fields{100, 0},
+		},
+		{
+			name: "generateOutput unix 0 + reactivity",
+			args: args{
+				t: time.Unix(0, 0),
+			},
+			want:   100 + 1,
+			fields: fields{100, 1},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			p := &powerplant{
+				reactivity: tt.fields.reactivity,
+				output:     tt.fields.output,
+			}
+			if got := p.generateOutput(tt.args.t); got != tt.want {
+				t.Errorf("powerplant.generateOutput() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
