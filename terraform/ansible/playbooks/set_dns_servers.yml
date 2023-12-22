@@ -18,6 +18,6 @@
     - name: Set DNS servers for each connection
       ansible.builtin.nmcli:
         conn_name: "{{ item }}"
-        ipv4.dns: "10.10.40.201,1.1.1.1"
+        ipv4.dns: "10.10.20.254,1.1.1.1"
       with_items: "{{ connections.stdout_lines }}"
       when: "ansible_distribution | lower in ['debian', 'ubuntu']"

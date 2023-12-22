@@ -5,6 +5,11 @@
     - domain_controller
     - common_windows
 
+- hosts: domain_servers
+  gather_facts: False
+  roles:
+    - common_domain_server
+    - common_windows
 
 ## Add windows hosts to the domain
 - hosts: domain_members
