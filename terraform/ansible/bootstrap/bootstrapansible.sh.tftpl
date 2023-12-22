@@ -79,6 +79,9 @@ ansible-galaxy install graylog2.graylog
 #add rsyslog role
 ansible-galaxy install robertdebock.rsyslog
 
+#add ad
+ansible-galaxy collection install microsoft.ad
+
 # Create hosts file
 cat <<EOF > /etc/ansible/hosts
 ${hostsfile}

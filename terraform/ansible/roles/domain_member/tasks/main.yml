@@ -11,6 +11,8 @@
     retries: 60
     delay: 10
 
+## Common Domain Membership Tasks
+
 ## Set the DNS server to DomainController
 - name: Set DC as DNS
   win_dns_client:
@@ -19,14 +21,12 @@
       - "{{ hostvars['dc01'].ansible_host }}"
     log_path: C:\dns_logs.txt
 
-## Common Domain Membership Tasks
-
 - name: Join Windows computer to a domain
-  win_domain_membership:
+  microsoft.ad.membership:
     hostname: "{{ inventory_hostname_short }}"
     dns_domain_name: "{{ dns_domain_name }}"
-    domain_admin_user: "{{domain_admin_user}}"
-    domain_admin_password: "{{domain_admin_password}}"
+    domain_admin_user: "{{ domain_admin_user }}"
+    domain_admin_password: "{{ domain_admin_password }}"
     # domain_ou_path: "OU=Windows,OU=Machines,DC=codered,DC=local"
     state: domain
   register: domain_state
